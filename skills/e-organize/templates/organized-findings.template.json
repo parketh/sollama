@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.0",
+  "step": "organize",
+  "status": "blocked",
+  "inputs": {
+    "prepareOutputPath": "<target-repo>/.sollama/audits/<audit-id>/prepare-output.json",
+    "inspectFindingsPath": "<target-repo>/.sollama/audits/<audit-id>/inspect-findings.md",
+    "staticAnalysisPath": "<target-repo>/.sollama/audits/<audit-id>/static-analysis.md",
+    "candidateFindingsPath": "<target-repo>/.sollama/audits/<audit-id>/candidate-findings.md"
+  },
+  "summary": {
+    "candidateBlocks": 0,
+    "findingsTotal": 0,
+    "confirmed": 0,
+    "demote": 0,
+    "rejected": 0,
+    "blockers": [],
+    "warnings": []
+  },
+  "findings": []
+}
