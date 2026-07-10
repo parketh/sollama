@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1.0",
+  "step": "verify",
+  "status": "blocked",
+  "inputs": {
+    "prepareOutputPath": "<target-repo>/.sollama/audits/<audit-id>/prepare-output.json",
+    "organizedFindingsJsonPath": "<target-repo>/.sollama/audits/<audit-id>/organized-findings.json"
+  },
+  "summary": {
+    "findingsTotal": 0,
+    "attempted": 0,
+    "verified": 0,
+    "evidenceConfirmed": 0,
+    "unreproduced": 0,
+    "blocked": 0,
+    "blockers": [],
+    "warnings": []
+  },
+  "results": []
+}

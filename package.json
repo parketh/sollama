@@ -8,7 +8,8 @@
     "format:check": "biome check .",
     "typecheck": "tsc --noEmit",
     "validate:prepare": "bun run skills/a-prepare/scripts/validate-prepare-output.ts",
-    "validate:organize": "bun run skills/e-organize/scripts/validate-organize-output.ts"
+    "validate:organize": "bun run skills/e-organize/scripts/validate-organize-output.ts",
+    "validate:verify": "bun run skills/f-verify/scripts/validate-verify-output.ts"
   },
   "dependencies": {
     "zod": "^4.0.0"
