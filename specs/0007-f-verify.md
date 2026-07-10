@@ -66,6 +66,12 @@ Info-class findings may be evidence-confirmed:
 
 Do not broaden scope while verifying. Avoid tests, generated code, deployment scripts, and vendored dependencies unless they were explicitly in audit scope or needed only as harness scaffolding.
 
+## Carry-Forward Rules
+
+`verification.json` is self-contained for `g-report`; report does not read `organized-findings.json`. For each verified/attempted finding, copy the display fields from the matching organized finding (`id == findingId`) into the result: `program`, `instruction`, `class`, `description`, `impact`, and `recommendedFix`.
+
+Carry `severity` from the organized finding as the starting classification, but reclassify it when the reproduced impact differs from the organizer's estimate (e.g. a demoted-severity lead that reproduces as material loss, or an overstated finding that reproduces as bounded harm). Record the reclassification reason in `rationale` or `notes`. Use `null` only for results that cannot be scored.
+
 ## Schema Contract
 
 The main schema is `VerificationResult`; the output is a flat list of verification results keyed back to organized finding IDs.
@@ -104,6 +110,16 @@ const VerificationResult = z.object({
   status: VerificationStatus,
   method: VerificationMethod,
   title: z.string().min(1),
+  // Display fields carried forward from the organized finding so
+  // verification.json is self-contained for g-report. See "Carry-Forward Rules".
+  program: z.string().min(1),
+  instruction: z.string().min(1),
+  class: z.string().min(1),
+  description: z.string().min(1),
+  impact: z.string().min(1),
+  recommendedFix: z.string().optional(),
+  // severity is carried from organize but MAY be reclassified here based on
+  // reproduced impact. null only for results that cannot be scored.
   severity: Severity.nullable(),
   rationale: z.string().min(1),
   evidence: z.array(z.string()).default([]),
@@ -146,7 +162,7 @@ For `status: "blocked"`, still write a schema-valid `verification.json` when pos
 ````markdown
 ---
 name: f-verify
-description: (Step 6/8) Verify organized audit findings with tests or non-exploit evidence, then write validated verification.json.
+description: (Step 6/7) Verify organized audit findings with tests or non-exploit evidence, then write validated verification.json.
 ---
 
 # Verify
@@ -166,7 +182,7 @@ If any path is missing, ask the user for it.
 
 ## Procedure
 
-1. Read all inputs.
+1. Read all inputs. Upstream status guard: if `prepare-output.json` `status` is `"blocked"` or `organized-findings.json` `status` is `"blocked"`, stop and report the upstream blockers; do not verify. The operator must resolve the upstream block and re-run that step first.
 2. Select only findings with `status: "confirmed"` for verification.
 3. Ignore `demote` and `rejected` findings; they fall out at organize and are omitted from `verification.json`.
 4. Create or select a temporary worktree or branch at the pinned commit before writing test code.
@@ -176,9 +192,10 @@ If any path is missing, ask the user for it.
 8. Record commands, exit statuses, output logs, patches, test files, and artifacts.
 9. Copy test artifacts into `<audit-dir>/pocs/<finding-id>/`.
 10. Assign verification `status`.
-11. Write `verification.json`.
-12. Run `bun run skills/f-verify/scripts/validate-verify-output.ts <path-to-verification.json>`.
-13. Fix schema issues and re-run validation until it passes or the step is blocked.
+11. Carry forward display fields from the organized finding (`program`, `instruction`, `class`, `description`, `impact`, `recommendedFix`) and set/reclassify `severity` per the Carry-Forward Rules.
+12. Write `verification.json`.
+13. Run `bun run skills/f-verify/scripts/validate-verify-output.ts <path-to-verification.json>`.
+14. Fix schema issues and re-run validation until it passes or the step is blocked.
 
 ## Status Rules
 

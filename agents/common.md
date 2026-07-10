@@ -66,7 +66,7 @@ Admin-only instructions doing admin things. Standard DeFi tradeoffs (rounding du
 
 ## Output
 
-Return findings as structured blocks inside `CANDIDATE.md`:
+Return findings as structured blocks written only to the per-agent output file assigned in your prompt:
 
 ```
 FINDING | program: Name | instruction: handler | class: kebab-tag

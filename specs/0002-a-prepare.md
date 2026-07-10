@@ -46,7 +46,7 @@ Failing tests are still important audit context and must be summarized, with a w
 - Create: `skills/a-prepare/scripts/validate-prepare-output.ts`
 - Create: `skills/a-prepare/templates/prepare-output.template.json`
 
-Do not create the other workflow skills in this spec except for directories if needed by plugin discovery. Their implementation belongs to `0003`-`0009`.
+Do not create the other workflow skills in this spec except for directories if needed by plugin discovery. Their implementation belongs to `0003`-`0008`.
 
 ## Artifact Contract
 
@@ -56,9 +56,9 @@ Prepare writes:
 <target-repo>/.sollama/audits/<audit-id>/prepare-output.json
 ```
 
-If prepare blocks after the target repo path is known, it still writes a schema-valid `prepare-output.json` with `status: "blocked"` and the blocker details in `summary.blockers`.
+If prepare blocks after the `auditId` and run directory exist (i.e. repo path and pinned commit both resolved), it still writes a schema-valid `prepare-output.json` with `status: "blocked"` and the blocker details in `summary.blockers`.
 
-If the target repo itself cannot be resolved, write no target artifact and report the blocking condition directly to the user.
+If the target repo cannot be resolved or the pinned commit is unavailable, no `auditId` can be formed and no run directory exists; write no target artifact and report the blocking condition directly to the user.
 
 ## Prepare Schemas
 
@@ -84,6 +84,7 @@ const Command = z.object({
 
 const PrepareInput = z.object({
   schemaVersion: z.literal("1.0"),
+  auditId: z.string().min(1),
   repoPath: z.string().min(1),
   commitHash: z.string().min(7),
   auditScope: z.string(),
@@ -311,8 +312,8 @@ Expected: JSON parses and formats cleanly.
 
 ````markdown
 ---
-name: prepare
-description: (Step 1/8) Prepare a Rust Solana repository for a Sollama audit by collecting inputs, checking the pinned commit, detecting framework/tooling/env, installing dependencies, running build/tests, and writing validated prepare-output.json.
+name: a-prepare
+description: (Step 1/7) Prepare a Rust Solana repository for a Sollama audit by collecting inputs, checking the pinned commit, detecting framework/tooling/env, installing dependencies, running build/tests, and writing validated prepare-output.json.
 ---
 
 # Prepare
@@ -332,21 +333,28 @@ Collect required inputs from the invocation prompt when present. If inputs are m
 
 Store skipped optional inputs as empty strings.
 
+## Audit ID
+
+Prepare owns audit-id generation. Compute it once, create `<target-repo>/.sollama/audits/<auditId>/`, and record it in `inputs.auditId`. Downstream skills resolve the audit directory from the `prepare-output.json` path they are given and never regenerate the id.
+
+Recipe: `<repo-name>-<commitHash[:7]>-<YYYYMMDD-HHMMSS>`, e.g. `jupiter-swap-a1b2c3d-20260710-161300`. Slugify the repo name to a filesystem-safe token. The timestamp makes repeated runs at the same commit distinct.
+
 ## Procedure
 
 1. Resolve the target repository path to an absolute path.
 2. Confirm it is a local Git repository. Remote git repos are not supported.
 3. Confirm the pinned commit exists locally with `git cat-file -e <commit>^{commit}`.
-4. Record enough context to explain the result, but do not modify the working tree.
-5. Detect whether the repository is a Rust Solana program.
-6. Detect frameworks and tooling.
-7. Preserve audit scope and focus as text inputs.
-8. Identify required environment variables from docs, config, build scripts, and test errors.
-9. Install project dependencies using the target repo’s package managers.
-10. Run the build command appropriate for the detected framework.
-11. Run available tests or record that tests are absent/skipped.
-12. Write `prepare-output.json`.
-13. Validate `prepare-output.json`.
+4. Compute the `auditId` and create the run directory `<target-repo>/.sollama/audits/<auditId>/`. Record `auditId` in `inputs.auditId`.
+5. Record enough context to explain the result, but do not modify the target's tracked working tree. Writing under `.sollama/` creates untracked files in the target repo; add `.sollama/` to the target's `.gitignore` (or `.git/info/exclude` if `.gitignore` is itself tracked and should not be edited) so audit artifacts never pollute the target's git status or get accidentally committed.
+6. Detect whether the repository is a Rust Solana program.
+7. Detect frameworks and tooling.
+8. Preserve audit scope and focus as text inputs.
+9. Identify required environment variables from docs, config, build scripts, and test errors.
+10. Install project dependencies using the target repo’s package managers.
+11. Run the build command appropriate for the detected framework.
+12. Run available tests or record that tests are absent/skipped.
+13. Write `prepare-output.json`.
+14. Validate `prepare-output.json`.
 
 ## Scope And Focus
 
@@ -554,6 +562,7 @@ const Command = z.object({
 
 const PrepareInput = z.object({
   schemaVersion: z.literal("1.0"),
+  auditId: z.string().min(1),
   repoPath: z.string().min(1),
   commitHash: z.string().min(7),
   auditScope: z.string(),

@@ -4,7 +4,7 @@
 
 **Goal:** Define the high-level architecture for Sollama, an agentic AI auditor for Rust Solana programs.
 
-**Architecture:** Sollama v1 is a plugin-distributed, skill-first audit system. Each audit phase is an independently runnable skill that reads prior artifacts, writes deterministic outputs into a run directory, validates those outputs, and can be composed by the top-level audit skill into an end-to-end workflow.
+**Architecture:** Sollama v1 is a plugin-distributed, skill-first audit system. Each audit phase is an independently runnable skill that reads prior artifacts, writes deterministic outputs into a run directory, and validates those outputs. Composing the phases into a single end-to-end command is future work and is out of scope for this spec set (`0001`-`0008`).
 
 **Tech Stack:** Markdown skills, Codex/Claude Code plugin manifests, Bun, TypeScript, Zod, Biome, target-native Solana build/test tooling.
 
@@ -33,7 +33,6 @@ agents/
   lenses/*.md
   gaps/*.md
 skills/
-  audit/  <-- top-level skill that runs the e2e audit workflow
   a-prepare/
   b-inspect/
   c-static-analysis/
@@ -50,7 +49,6 @@ specs/
   0006-e-organize.md
   0007-f-verify.md
   0008-g-report.md
-  0009-audit.md
 .codex-plugin/
   plugin.json
 .claude-plugin/
@@ -98,14 +96,13 @@ organized-findings.md
 verification.json
 pocs/
 report/report.md
-status.json
 ```
 
 Each step consumes only the target repo, the user-provided audit inputs, and prior validated artifacts. A step may be run independently for testing or review.
 
-The top-level `audit` skill runs the full workflow end to end without review pauses by default. It blocks only on missing required inputs, missing required tools, missing permissions, failed build, invalid artifacts, or other conditions that make continuing unsound.
+Each step blocks only on missing required inputs, missing required tools, missing permissions, failed build, invalid artifacts, or other conditions that make continuing unsound. When a step blocks, it reports the blocker, the exact user action required, and how to resume, with concrete continuation options such as an exact install command or the env var that must be provided.
 
-When blocked, `audit` writes a resumable status artifact with the blocked step, reason, exact user action required, and suggested resume command. It should prompt the user with concrete continuation options, such as an exact install command or the env var that must be provided.
+Every downstream step applies an upstream status guard: it reads the `status` field of the artifact(s) it consumes (JSON `status`, or the `Status` line in markdown metadata) and refuses to begin work when an upstream artifact is `blocked`, reporting the upstream blocker instead of wasting a full run. The one exception is `g-report`, which may still render a report from partial results but must mark it as produced from a blocked upstream rather than presenting it as a complete audit.
 
 ## Workflow
 
@@ -139,7 +136,7 @@ Inspect produces markdown only. Its skill and template define the required secti
 
 Deployment detection uses repo-local files and external documentation identified during inspect. It must not perform live RPC or explorer queries.
 
-External docs linked from the repo may be fetched. Interactive step runs should ask before fetching external URLs; full-auto `/audit` mode may fetch directly and cache or summarize the docs into the audit artifacts.
+External docs linked from the repo may be fetched. Interactive step runs should ask before fetching external URLs; a future full-auto mode may fetch directly and cache or summarize the docs into the audit artifacts.
 
 ### 3. Static Analysis
 
@@ -222,7 +219,7 @@ JSON artifacts are strict. The owning skill documents the schema, writes the JSO
 
 Markdown artifacts are not schema-validated in v1. Skills should document required sections and use templates where helpful, but deterministic validation scripts are reserved for JSON artifacts.
 
-The top-level `audit` skill validates JSON step outputs before invoking the next step. Missing or unusable markdown artifacts block the workflow by judgement, not by schema script.
+Each JSON-producing step validates its own output before handing off. Missing or unusable markdown artifacts block a dependent step by judgement, not by schema script.
 
 Each step owns its local schemas and validators under that skill’s `scripts/` directory. There is no shared schema package in v1.
 
@@ -230,13 +227,13 @@ The root Bun project exists only to provide one consistent validation/lint/test 
 
 ## Human Review Model
 
-During audit execution, `/audit` has no review gates by default. Users can run individual step skills independently when they want manual review, debugging, or isolated testing.
+Each step skill is run independently. Users invoke them in order and can pause for manual review, debugging, or isolated testing between any two steps.
 
-## Aggregate Audit Skill
+## Aggregate Audit Skill (Out Of Scope)
 
-The top-level `audit` skill is the only aggregate workflow entrypoint in v1. It runs `a-prepare`, `b-inspect`, `c-static-analysis`, `d-agent-fanout`, `e-organize`, `f-verify`, and `g-report` in order, validates JSON artifacts between steps, and writes `status.json` only when the workflow blocks or needs to be resumed.
+This spec set (`0001`-`0008`) does not build an aggregate workflow entrypoint. Each of `a-prepare`, `b-inspect`, `c-static-analysis`, `d-agent-fanout`, `e-organize`, `f-verify`, and `g-report` remains independently runnable and owns its own artifact contract, which is what makes a future aggregate possible.
 
-The aggregate skill does not duplicate step logic. Each step remains independently runnable and owns its own artifact contract.
+A future spec may add a top-level `audit` skill that runs the steps in order, validates JSON artifacts between steps, and writes a resumable run-status artifact. Its command surface, status schema, and orchestration are deferred and intentionally left unspecified here.
 
 ## Key Design Constraints
 
@@ -245,13 +242,16 @@ The aggregate skill does not duplicate step logic. Each step remains independent
 - Small scripts only where determinism matters.
 - No automatic dependency installation.
 - No live RPC or explorer queries in v1.
-- No eval workflow in specs `0001`-`0009`. This will be added in a later spec.
+- No eval workflow in specs `0001`-`0008`. This will be added in a later spec.
+- No aggregate `/audit` command in specs `0001`-`0008`. Steps run independently; composition is deferred to a later spec.
 - No duplicated skill or agent prompt trees.
 - No final-report suppression of unverified findings; they remain visible but separated.
+- Automated testing in v1 covers only the JSON-producing steps via their Zod validators. Markdown-only steps rely on manual review, and no committed sample target repo exists yet; a golden fixture target with known findings for reproducible end-to-end testing is deferred to a later spec.
 
 ## Risks
 
-- Plugin manifest schemas may change; implementation must verify current Codex and Claude Code plugin requirements before finalizing manifests.
+- Plugin manifest schemas may change; implementation must verify current Codex and Claude Code plugin requirements before finalizing manifests. <!-- UNRESOLVED (feasibility): Codex/Claude plugin manifest schema and static-analysis tool commands are deliberately verified at implementation time, not now. Blocks Feasibility 5/5 until confirmed against live docs. -->
+<!-- UNRESOLVED (testability): no committed golden fixture target repo; markdown-only steps have no automated/integration test in v1. Blocks Testability 5/5; deferred by decision. -->
 - Skill portability depends on avoiding platform-specific tool names in workflow text where possible.
 - Full parallel fanout is simple, but staged fanout may eventually improve gap-agent quality.
 - Required static analysis tools may make audits hard to run in constrained environments; project/user configurability is the escape hatch.

@@ -99,7 +99,7 @@ completed tool statuses, and exact continuation options folded into `## Triage S
 ````markdown
 ---
 name: c-static-analysis
-description: (Step 3/8) Run required Solana static-analysis tools, triage tool findings, and write static-analysis.md for downstream agent fanout.
+description: (Step 3/7) Run required Solana static-analysis tools, triage tool findings, and write static-analysis.md for downstream agent fanout.
 ---
 
 # Static Analysis
@@ -125,7 +125,7 @@ The required tool list can be overridden by explicit user/project context. If no
 
 ## Procedure
 
-1. Read `prepare-output.json`.
+1. Read `prepare-output.json`. If its `status` is `"blocked"`, stop and report the upstream blockers from `summary.blockers`; do not run tools. The operator must resolve the prepare block and re-run `a-prepare` first.
 2. Resolve target repo and audit output directory.
 3. Determine required tools.
 4. Consult current upstream docs/repos for required-tool detection, installation, and run commands.

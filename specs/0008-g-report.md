@@ -56,7 +56,9 @@ Unreproduced and blocked findings remain visible in a clearly separated section 
 
 Do not include organize findings with `status: "demote"` or `status: "rejected"` unless the user explicitly asks for a debugging section that includes dropped candidates. These fall out before verification.
 
-Use verification `severity` as the final severity classification.
+Use verification `severity` as the final severity classification. `f-verify` carries severity from organize and may reclassify it based on reproduced impact, so `verification.json` is authoritative for the final severity.
+
+`verification.json` is self-contained: `VerificationResult` carries `program`, `instruction`, `class`, `description`, `impact`, and `recommendedFix` alongside `severity`. Report renders every template field from `verification.json` and does not read `organized-findings.json`.
 
 ## Task 1: Create The Report Skill
 
@@ -71,7 +73,7 @@ Use verification `severity` as the final severity classification.
 ````markdown
 ---
 name: g-report
-description: (Step 7/8) Generate final Sollama audit report markdown from verification.json and audit artifacts.
+description: (Step 7/7) Generate final Sollama audit report markdown from verification.json and audit artifacts.
 ---
 
 # Report
@@ -95,7 +97,7 @@ If any required path is missing, ask the user for it.
 
 ## Procedure
 
-1. Read `prepare-output.json`.
+1. Read `prepare-output.json`. Upstream status guard: if `prepare-output.json` `status` is `"blocked"` or `verification.json` `status` is `"blocked"`, report the upstream blockers prominently; generate the report only from whatever results exist and mark it as produced from a blocked upstream. Do not present a blocked run as a complete audit.
 2. Read `verification.json`.
 3. Read available artifact references under `pocs/`.
 4. Build report content from verification results.

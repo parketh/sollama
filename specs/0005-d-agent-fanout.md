@@ -94,6 +94,10 @@ The fanout skill must not rely on the model or runtime resolving that relative l
 
 If the import marker is missing, do not silently launch the agent. Record the issue and block until the agent prompt is fixed or the user explicitly excludes that agent.
 
+The `FINDING` block format is defined once in `agents/common.md` (`## Output` section) and is the single source of truth. `common.md` instructs each agent to write only to its assigned per-agent output file; the composed prompt must reinforce that path and must not introduce a competing output filename.
+
+To avoid contract drift, the block fields (`program`, `instruction`, `class`, `description`, `severity`, `confidence`, `path`, `proof`, `fix`) are NOT restated anywhere else. The `candidate-findings` template references `common.md` rather than duplicating the block. The `e-organize` parser is the one legitimate consumer that re-encodes the field list — because it must validate the format — and it cites `agents/common.md` as the authority in a comment so any field change there is a signal to update the parser.
+
 Some existing shared examples are EVM/Solidity-flavored. The composed prompt must make the target explicit: the agents are auditing Rust Solana programs, and any non-Solana examples in common rules are reasoning analogies, not audit scope.
 
 ## Output Contract
@@ -138,7 +142,7 @@ If an agent emits malformed or partial finding blocks, preserve them in `candida
 ````markdown
 ---
 name: d-agent-fanout
-description: (Step 4/8) Run Sollama specialist audit agents in parallel and aggregate candidate findings.
+description: (Step 4/7) Run Sollama specialist audit agents in parallel and aggregate candidate findings.
 ---
 
 # Agent Fanout
@@ -159,7 +163,7 @@ If any audit artifact path is missing, ask the user for it. Do not ask the user 
 
 ## Procedure
 
-1. Read `prepare-output.json`, `inspect-findings.md`, and `static-analysis.md`.
+1. Read `prepare-output.json`, `inspect-findings.md`, and `static-analysis.md`. Upstream status guard: if `prepare-output.json` `status` is `"blocked"` or `static-analysis.md` metadata `Status` is `blocked`, stop and report the upstream blockers; do not launch agents. The operator must resolve the upstream block and re-run that step first.
 2. Read `agents/common.md` from the installed Sollama plugin context.
 3. Discover specialist agents under the installed plugin's `agents/lenses/*.md`, `agents/mechanics/*.md`, and `agents/gaps/*.md`.
 4. Sort agents by relative path and derive stable agent IDs.
@@ -247,19 +251,7 @@ Finish by reporting:
 
 Group candidate blocks by `(program, instruction, class)` when possible. Preserve the original agent's wording and optional fields.
 
-### program / instruction / class
-
-Source agent:
-
-```text
-FINDING | program: Name | instruction: handler | class: kebab-tag
-description:
-severity: info | low | medium | high
-confidence: low | medium | high
-path:
-proof:
-fix:
-```
+Each block uses the canonical `FINDING` format defined in `agents/common.md` (`## Output`). Do not restate the field list here — copy each agent's block verbatim under a `### program / instruction / class` heading with a `Source agent:` line, so `common.md` remains the single source of truth.
 
 ## Fanout Notes
 

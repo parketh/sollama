@@ -95,7 +95,7 @@ Third-party dependencies are trust boundaries. Inspect should identify their rol
 ````markdown
 ---
 name: b-inspect
-description: (Step 2/8) Inspect a prepared Rust Solana repository and write inspect-findings.md with scope, docs, components, flows, roles, invariants, dependencies, attack surfaces, and upgradeability.
+description: (Step 2/7) Inspect a prepared Rust Solana repository and write inspect-findings.md with scope, docs, components, flows, roles, invariants, dependencies, attack surfaces, and upgradeability.
 ---
 
 # Inspect
@@ -112,14 +112,17 @@ Required input:
 
 If the path is missing, ask the user for it.
 
+Upstream status guard: read `prepare-output.json` first. If `status` is `"blocked"`, stop and report the upstream blockers from `summary.blockers`; do not inspect. The operator must resolve the prepare block and re-run `a-prepare` before this step.
+
 Read `prepare-output.json` before inspecting the repository. Use:
 
+- `inputs.auditId`
 - `inputs.repoPath`
 - `inputs.commitHash`
 - `inputs.auditScope`
 - `inputs.auditFocus`
 - `detected.frameworks`
-- `detected.package_managers`
+- `detected.packageManagers`
 - `commands.build`
 - `commands.tests`
 - `summary.warnings`
@@ -131,7 +134,7 @@ Read `prepare-output.json` before inspecting the repository. Use:
 3. Expand audit scope into exact files.
 4. Count LOC and nSLOC for in-scope files with `skills/b-inspect/scripts/count-loc.ts`.
 5. Read repo-local docs and configs relevant to the in-scope program.
-6. Identify externally linked docs. In interactive step runs, ask before fetching external URLs. In full-auto audit mode, fetch directly and cache/summarize into the audit artifacts.
+6. Identify externally linked docs. Ask before fetching external URLs. (A future full-auto mode may fetch directly and cache/summarize into the audit artifacts; that mode is out of scope here.)
 7. Identify known deployments from repo-local files and fetched docs only. Do not query live RPC or explorers.
 8. Map folder structure, components, accounts, instructions, libraries, local shared code, and copied/forked boilerplate.
 9. Classify entrypoints and important internal functions with access level, caller, parameters, call chain, state changes, value flow, CPI usage, signer/PDA usage, assumptions, parameter ranges, and arithmetic formulas where relevant.
@@ -557,6 +560,6 @@ Manual output review:
 ## Risks
 
 - LOC/nSLOC counts may be approximate without a dedicated local counter; approximate counts are acceptable if the method is documented.
-- External documentation fetching differs between interactive step runs and full-auto audit mode.
+- External documentation fetching asks before fetching in step runs; a future full-auto mode may fetch directly.
 - Scope expansion is judgment-heavy. The skill must document decisions rather than pretend scope is obvious.
 - Inspect can become bloated. Keep prose concise and focus on facts downstream agents need.

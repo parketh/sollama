@@ -44,14 +44,24 @@ Do not create markdown validation scripts. Validation is only for `organized-fin
 
 ## Organization Rules
 
-Parse every `FINDING` block from `candidate-findings.md`. Preserve malformed or partial blocks as `demote` or `rejected` findings rather than silently dropping them.
+Parse every `FINDING` block from `candidate-findings.md`. The `FINDING` field list is defined once in `agents/common.md` (`## Output`); the parser is its one legitimate re-encoder and must cite `agents/common.md` as the authority in a comment, so a field change there flags a parser update. Preserve malformed or partial blocks as `demote` or `rejected` findings rather than silently dropping them.
 
-Use `(program, instruction, class)` as a dedupe guard and review aid:
+`class` is an intentionally free-text kebab tag invented by each agent, not a controlled vocabulary. Grouping on it is a soft aid, so dedupe must not rely on class tags matching. Two passes are required:
+
+Pass 1 — group by `(program, instruction, class)`:
 
 - Key match means "compare carefully."
 - Key mismatch usually means "do not merge."
 - Merge across key mismatch only when the same root cause clearly appears through multiple entrypoints.
 - Split same-key candidates when they describe different root causes, impacts, fixes, or exploit paths.
+
+Pass 2 — re-run at `(program, instruction)` ignoring `class`:
+
+- Agents often label the same underlying bug with different class tags (e.g. `missing-signer` vs `signer-check`). Pass 2 catches synonymous-class duplicates that Pass 1 missed.
+- Compare the body (description, root cause, attack path, fix) across class boundaries. Merge only when root cause and attack path match; distinct mechanisms at the same `(program, instruction)` remain separate findings.
+- Never merge across different `program` or `instruction`. Pass 2 stays within `(program, instruction)`.
+
+Completeness gate (before writing output): list every unique `(program, instruction)` appearing in any candidate `FINDING` block. Every such `(program, instruction)` must map to at least one organized finding of any status. Zero coverage means a candidate was silently dropped — fix it, or record the drop with rationale in `summary.warnings`.
 
 Final output is a flat `findings` array. Do not create separate top-level arrays for groups, rejected candidates, or verification queues.
 
@@ -212,7 +222,7 @@ For `status: "blocked"`, still write a schema-valid `organized-findings.json` wh
 ````markdown
 ---
 name: e-organize
-description: (Step 5/8) Deduplicate and judge candidate audit findings into validated organized-findings.json plus organized-findings.md.
+description: (Step 5/7) Deduplicate and judge candidate audit findings into validated organized-findings.json plus organized-findings.md.
 ---
 
 # Organize
@@ -234,19 +244,21 @@ If any path is missing, ask the user for it.
 
 ## Procedure
 
-1. Read all inputs.
+1. Read all inputs. Upstream status guard: if `prepare-output.json` `status` is `"blocked"` or `candidate-findings.md` metadata `Status` is `blocked`, stop and report the upstream blockers; do not organize. The operator must resolve the upstream block and re-run that step first.
 2. Parse candidate `FINDING` blocks from `candidate-findings.md`.
 3. Preserve malformed candidate blocks as `demote` or `rejected`; do not silently drop them.
-4. Group candidates by `(program, instruction, class)` as a comparison aid.
+4. Group candidates by `(program, instruction, class)` as a comparison aid (Pass 1).
 5. Split candidates that have different root causes, fixes, impacts, or attack paths.
 6. Merge candidates only when they describe the same root cause and attack path.
-7. For each resulting item, run the four validation gates in order.
-8. Assign `status: "confirmed" | "rejected" | "demote"`.
-9. Assign severity and confidence when meaningful; use `null` when rejected data should not be scored.
-10. Write `organized-findings.json`.
-11. Run `bun run skills/e-organize/scripts/validate-organize-output.ts <path-to-organized-findings.json>`.
-12. Fix schema issues and re-run validation until it passes or the step is blocked.
-13. Write `organized-findings.md` from the validated JSON.
+7. Re-run dedup at `(program, instruction)` ignoring `class` (Pass 2) to catch synonymous-class duplicates; never merge across different `program`/`instruction`.
+8. Run the completeness gate: every unique `(program, instruction)` in the candidates must map to at least one organized finding, else record the drop in `summary.warnings`.
+9. For each resulting item, run the four validation gates in order.
+10. Assign `status: "confirmed" | "rejected" | "demote"`.
+11. Assign severity and confidence when meaningful; use `null` when rejected data should not be scored.
+12. Write `organized-findings.json`.
+13. Run `bun run skills/e-organize/scripts/validate-organize-output.ts <path-to-organized-findings.json>`.
+14. Fix schema issues and re-run validation until it passes or the step is blocked.
+15. Write `organized-findings.md` from the validated JSON.
 
 ## Validation Gates
 
