@@ -1,3 +1,5 @@
+<!-- Adapted from pashov/skills solidity-auditor/references/hacking-agents/shared-rules.md (MIT). Modified for Solana. See ATTRIBUTION.md. -->
+
 # Common Rules
 
 ## Auditing Principles
