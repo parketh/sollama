@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "1.0",
+  "step": "prepare",
+  "status": "ready",
+  "inputs": {
+    "schemaVersion": "1.0",
+    "auditId": "jupiter-swap-a1b2c3d-20260710-161300",
+    "repoPath": "/Users/auditor/targets/jupiter-swap",
+    "commitHash": "a1b2c3d",
+    "auditScope": "Audit the deployable program crates under programs/. Exclude clients and tests.",
+    "auditFocus": "Focus on swap math and authority checks. Key question: can a swap be front-run to drain the pool?"
+  },
+  "detected": {
+    "isSolana": true,
+    "languages": ["rust", "typescript"],
+    "frameworks": ["anchor"],
+    "packageManagers": ["cargo", "bun"],
+    "env": {
+      "required": [
+        {
+          "name": "ANCHOR_PROVIDER_URL",
+          "valueRef": ".env.example"
+        }
+      ],
+      "missing": [
+        {
+          "name": "ANCHOR_WALLET"
+        }
+      ]
+    }
+  },
+  "commands": {
+    "install": [
+      {
+        "cwd": "/Users/auditor/targets/jupiter-swap",
+        "command": "bun install",
+        "status": "passed"
+      }
+    ],
+    "build": {
+      "cwd": "/Users/auditor/targets/jupiter-swap",
+      "command": "anchor build",
+      "status": "passed"
+    },
+    "tests": [
+      {
+        "cwd": "/Users/auditor/targets/jupiter-swap",
+        "command": "anchor test",
+        "status": "failed",
+        "error": "1 failing: swap slippage test timed out against localnet"
+      }
+    ]
+  },
+  "summary": {
+    "isSupported": true,
+    "buildPassed": true,
+    "testsPassed": false,
+    "blockers": [],
+    "warnings": [
+      "Test suite has 1 failing test (swap slippage against localnet); does not block the audit but affects confidence."
+    ]
+  }
+}
