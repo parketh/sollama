@@ -1,0 +1,8 @@
+{
+  "name": "sollama",
+  "version": "0.1.0",
+  "description": "Agentic AI smart contract auditor for Rust Solana programs.",
+  "author": {
+    "name": "Sollama"
+  }
+}
