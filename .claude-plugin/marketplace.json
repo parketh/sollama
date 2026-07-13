@@ -1,0 +1,7 @@
+{
+  "name": "sollama-dev",
+  "owner": { "name": "Sollama" },
+  "plugins": [
+    { "name": "sollama", "source": "./" }
+  ]
+}
