@@ -2,20 +2,20 @@
 
 ## Metadata
 
-- Audit ID:
-- Target repo:
-- Pinned commit:
-- Prepared from:
-- Generated at:
-- Build status from prepare:
-- Test status from prepare:
-- Audit focus:
+- Audit ID: <audit-id>
+- Target repo: <route-to-target-repo>
+- Pinned commit: <commit-hash>
+- Prepared from: <route-to-prepare-output-json>
+- Generated at: <date-time>
+- Build status from prepare: <build-status>
+- Test status from prepare: <test-status>
+- Audit focus: <audit-focus>
 
 ## Audit Scope
 
 ### Scope Source
 
-Describe whether scope came from defaults, user-provided text, or both.
+Describe whether scope is default (i.e. all contracts in scope) or user-provided, and if so, what it contains.
 
 ### Included Files
 
