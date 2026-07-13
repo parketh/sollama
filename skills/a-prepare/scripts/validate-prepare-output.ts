@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { validateJsonFile } from "../../shared/scripts/validate.ts"
+import { validateJsonFile } from "../../../scripts/shared/validate.ts"
 
 const Env = z
   .object({

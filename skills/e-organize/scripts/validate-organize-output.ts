@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { validateJsonFile } from "../../shared/scripts/validate.ts"
+import { validateJsonFile } from "../../../scripts/shared/validate.ts"
 
 const Status = z.enum(["confirmed", "rejected", "demote"])
 const Severity = z.enum(["info", "low", "medium", "high"])

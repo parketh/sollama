@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { validateJsonFile } from "../../shared/scripts/validate.ts"
+import { validateJsonFile } from "../../../scripts/shared/validate.ts"
 
 const VerificationStatus = z.enum(["verified", "evidence-confirmed", "unreproduced", "blocked"])
 const VerificationMethod = z.enum(["test", "evidence", "none"])
