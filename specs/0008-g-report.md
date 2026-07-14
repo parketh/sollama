@@ -58,7 +58,7 @@ Do not include organize findings with `status: "demote"` or `status: "rejected"`
 
 Use verification `severity` as the final severity classification. `f-verify` carries severity from organize and may reclassify it based on reproduced impact, so `verification.json` is authoritative for the final severity.
 
-`verification.json` is self-contained: `VerificationResult` carries `program`, `instruction`, `class`, `description`, `impact`, and `recommendedFix` alongside `severity`. Report renders every template field from `verification.json` and does not read `organized-findings.json`.
+Metadata source split: `prepare-output.json` supplies the `## Summary` audit metadata and scope (target, commit, audit scope, audit focus); the `generated-at` timestamp is stamped when the report is written. `verification.json` supplies all findings and verification data — `VerificationResult` carries `program`, `instruction`, `class`, `description`, `impact`, and `recommendedFix` alongside `severity`, so per-finding fields are rendered from it and never from `organized-findings.json`, which report does not read.
 
 ## Task 1: Create The Report Skill
 
