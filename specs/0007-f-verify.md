@@ -156,6 +156,8 @@ const VerifyOutput = z.object({
 })
 ```
 
+Validator invariants: each `findingId` appears at most once; `method` must be valid for the result `status` (`verified`→`test`, `evidence-confirmed`→`evidence`, `unreproduced`→`test`|`evidence`, `blocked`→`none`); `summary.findingsTotal` equals `results.length`; `verified`/`evidenceConfirmed`/`unreproduced`/`blocked` each equal their status count; and `attempted` equals `findingsTotal` minus `blocked`.
+
 For `status: "blocked"`, still write a schema-valid `verification.json` when possible. Put blocker details in `summary.blockers`.
 
 ## Task 1: Create The Verify Skill
