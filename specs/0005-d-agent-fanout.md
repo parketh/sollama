@@ -174,16 +174,17 @@ If any audit artifact path is missing, ask the user for it. Do not ask the user 
 ## Procedure
 
 1. Read `prepare-output.json`, `inspect-findings.md`, and `static-analysis.md`. Upstream status guard: if `prepare-output.json` `status` is `"blocked"` or `static-analysis.md` metadata `Status` is `blocked`, stop and report the upstream blockers; do not launch agents. The operator must resolve the upstream block and re-run that step first.
-2. Read `agents/common.md` from the installed Sollama plugin context.
-3. Discover specialist agents under the installed plugin's `agents/lenses/*.md`, `agents/mechanics/*.md`, and `agents/gaps/*.md`.
-4. Sort agents by relative path and derive stable agent IDs.
-5. For each specialist agent, compose a prompt by injecting `agents/common.md` into its `## Common rules` section and appending the audit context plus assigned output path.
-6. Launch all specialist agents in parallel using the current agent harness's subagent/parallel execution facility.
-7. Require each agent to write one output file under `fanout/<agent-file-id>.md`.
-8. Retry failed or missing agent runs once if the failure is transient.
-9. If any required agent still fails, write `candidate-findings.md` with status `blocked` unless the user explicitly excludes that agent.
-10. Aggregate per-agent outputs into `candidate-findings.md`: assign `CAND-XXX` ids, build the `## Summary` and `## Convergence` tables, then the grouped full blocks.
-11. Preserve candidate blocks, agent provenance, malformed blocks, and parse warnings without deduping or merging findings.
+2. Confirm the pinned commit is checked out: `git rev-parse HEAD` must equal `inputs.commitHash` and `git status --porcelain` must be empty. If HEAD differs or the working tree is dirty, stop and report a blocker; do not launch agents against a different or modified tree. Do not change the checkout yourself; the operator must set the correct checkout.
+3. Read `agents/common.md` from the installed Sollama plugin context.
+4. Discover specialist agents under the installed plugin's `agents/lenses/*.md`, `agents/mechanics/*.md`, and `agents/gaps/*.md`.
+5. Sort agents by relative path and derive stable agent IDs.
+6. For each specialist agent, compose a prompt by injecting `agents/common.md` into its `## Common rules` section and appending the audit context plus assigned output path.
+7. Launch all specialist agents in parallel using the current agent harness's subagent/parallel execution facility.
+8. Require each agent to write one output file under `fanout/<agent-file-id>.md`.
+9. Retry failed or missing agent runs once if the failure is transient.
+10. If any required agent still fails, write `candidate-findings.md` with status `blocked` unless the user explicitly excludes that agent.
+11. Aggregate per-agent outputs into `candidate-findings.md`: assign `CAND-XXX` ids, build the `## Summary` and `## Convergence` tables, then the grouped full blocks.
+12. Preserve candidate blocks, agent provenance, malformed blocks, and parse warnings without deduping or merging findings.
 
 ## Prompt Rules
 

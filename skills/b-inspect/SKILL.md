@@ -35,7 +35,7 @@ Read `prepare-output.json` before inspecting the repository. Use:
 ## Procedure
 
 1. Resolve the target repo and audit output directory from `prepare-output.json`.
-2. Confirm the target repo is still at or can read the pinned commit.
+2. Confirm the pinned commit is checked out: `git rev-parse HEAD` must equal `inputs.commitHash` and `git status --porcelain` must be empty. If HEAD differs or the working tree is dirty, stop and report a blocker; do not inspect a different or modified tree. Do not change the checkout yourself; the operator must set the correct checkout.
 3. Expand audit scope into exact files.
 4. Count LOC and nSLOC for in-scope files with `skills/b-inspect/scripts/count-loc.ts`.
 5. Read repo-local docs and configs relevant to the in-scope program.

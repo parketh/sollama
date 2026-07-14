@@ -27,7 +27,7 @@ The required tool list can be overridden by explicit user/project context. If no
 ## Procedure
 
 1. Read `prepare-output.json`. If its `status` is `"blocked"`, stop and report the upstream blockers from `summary.blockers`; do not run tools. The operator must resolve the prepare block and re-run `a-prepare` first.
-2. Resolve target repo and audit output directory.
+2. Resolve target repo and audit output directory. Confirm the pinned commit is checked out: `git rev-parse HEAD` must equal `inputs.commitHash` and `git status --porcelain` must be empty. If HEAD differs or the working tree is dirty, stop and report a blocker; do not scan a different or modified tree. Do not change the checkout yourself; the operator must set the correct checkout.
 3. Determine required tools.
 4. Consult current upstream docs/repos for required-tool detection, installation, and run commands.
 5. Check whether each required tool is installed and runnable.
