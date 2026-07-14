@@ -345,7 +345,7 @@ Recipe: `<repo-name>-<commitHash[:7]>-<YYYYMMDD-HHMMSS>`, e.g. `jupiter-swap-a1b
 2. Confirm it is a local Git repository. Remote git repos are not supported.
 3. Confirm the pinned commit exists locally with `git cat-file -e <commit>^{commit}`, then confirm it is checked out: `git rev-parse HEAD` must equal the pinned commit and `git status --porcelain` must be empty. If HEAD differs or the working tree is dirty, block — write a schema-valid `prepare-output.json` with `status: "blocked"` and the mismatch in `summary.blockers`. Do not check out the commit or discard changes yourself; the operator must set the correct checkout.
 4. Compute the `auditId` and create the run directory `<target-repo>/.sollama/audits/<auditId>/`. Record `auditId` in `inputs.auditId`.
-5. Record enough context to explain the result, but do not modify the target's tracked working tree. Writing under `.sollama/` creates untracked files in the target repo; add `.sollama/` to the target's `.gitignore` (or `.git/info/exclude` if `.gitignore` is itself tracked and should not be edited) so audit artifacts never pollute the target's git status or get accidentally committed.
+5. Record enough context to explain the result, but do not modify the target's tracked working tree. Writing under `.sollama/` creates untracked files in the target repo; add `.sollama/` to the target's `.git/info/exclude` (which is local and never committed) so audit artifacts never pollute the target's git status or get accidentally committed. Do not edit the tracked `.gitignore`.
 6. Detect whether the repository is a Rust Solana program.
 7. Detect frameworks and tooling.
 8. Preserve audit scope and focus as text inputs.
