@@ -2,10 +2,7 @@ import { isAbsolute } from "node:path"
 import { z } from "zod"
 import { validateJsonFile } from "../../../scripts/shared/validate.ts"
 
-const AbsolutePath = z
-  .string()
-  .min(1)
-  .refine(isAbsolute, { message: "must be an absolute path" })
+const AbsolutePath = z.string().min(1).refine(isAbsolute, { message: "must be an absolute path" })
 
 const Env = z
   .strictObject({
@@ -69,13 +66,29 @@ const PrepareOutput = z
   .superRefine((o, ctx) => {
     if (o.status === "ready") {
       if (!o.summary.isSupported)
-        ctx.addIssue({ code: "custom", path: ["summary", "isSupported"], message: "ready requires isSupported" })
+        ctx.addIssue({
+          code: "custom",
+          path: ["summary", "isSupported"],
+          message: "ready requires isSupported",
+        })
       if (!o.summary.buildPassed)
-        ctx.addIssue({ code: "custom", path: ["summary", "buildPassed"], message: "ready requires buildPassed" })
+        ctx.addIssue({
+          code: "custom",
+          path: ["summary", "buildPassed"],
+          message: "ready requires buildPassed",
+        })
       if (o.summary.blockers.length > 0)
-        ctx.addIssue({ code: "custom", path: ["summary", "blockers"], message: "ready must have no blockers" })
+        ctx.addIssue({
+          code: "custom",
+          path: ["summary", "blockers"],
+          message: "ready must have no blockers",
+        })
     } else if (o.summary.blockers.length === 0) {
-      ctx.addIssue({ code: "custom", path: ["summary", "blockers"], message: "blocked requires at least one blocker" })
+      ctx.addIssue({
+        code: "custom",
+        path: ["summary", "blockers"],
+        message: "blocked requires at least one blocker",
+      })
     }
   })
 

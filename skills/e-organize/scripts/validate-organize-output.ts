@@ -71,13 +71,34 @@ const OrganizedFinding = z
     // Confirmed findings must be fully specified and scored; the relaxed fields
     // above only exist to preserve malformed demote/rejected candidates.
     if (f.severity === null || f.confidence === null)
-      ctx.addIssue({ code: "custom", path: ["severity"], message: "Confirmed findings require non-null severity and confidence" })
-    for (const field of ["title", "program", "instruction", "class", "description", "rootCause", "attackPath", "impact"] as const) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["severity"],
+        message: "Confirmed findings require non-null severity and confidence",
+      })
+    for (const field of [
+      "title",
+      "program",
+      "instruction",
+      "class",
+      "description",
+      "rootCause",
+      "attackPath",
+      "impact",
+    ] as const) {
       if (f[field] === "")
-        ctx.addIssue({ code: "custom", path: [field], message: `Confirmed findings require non-empty ${field}` })
+        ctx.addIssue({
+          code: "custom",
+          path: [field],
+          message: `Confirmed findings require non-empty ${field}`,
+        })
     }
     if (f.validation.length === 0)
-      ctx.addIssue({ code: "custom", path: ["validation"], message: "Confirmed findings require at least one validation gate" })
+      ctx.addIssue({
+        code: "custom",
+        path: ["validation"],
+        message: "Confirmed findings require at least one validation gate",
+      })
   })
 
 const OrganizeOutput = z
