@@ -44,7 +44,7 @@ Do not create markdown validation scripts. Validation is only for `organized-fin
 
 ## Organization Rules
 
-Parse every `FINDING` block from `candidate-findings.md`. The `FINDING` field list is defined once in `agents/common.md` (`## Output`); the parser is its one legitimate re-encoder and must cite `agents/common.md` as the authority in a comment, so a field change there flags a parser update. Preserve malformed or partial blocks as `demote` or `rejected` findings rather than silently dropping them.
+Parse every `FINDING` block from `candidate-findings.md`. The `FINDING` field list is defined once in `agents/common.md` (`## Output`); the parser is its one legitimate re-encoder and must cite `agents/common.md` as the authority in a comment, so a field change there flags a parser update. Preserve malformed or partial blocks as `demote` or `rejected` findings rather than silently dropping them. Represent them losslessly: put the original candidate text in `rawBlock`, explain the defect in `parseWarning`, and leave the core content fields (`program`, `instruction`, `class`, `description`, `rootCause`, `attackPath`, `impact`, `validation`) empty where they cannot be recovered. Only `confirmed` findings must fill those fields.
 
 `class` is an intentionally free-text kebab tag invented by each agent, not a controlled vocabulary. Grouping on it is a soft aid, so dedupe must not rely on class tags matching. Two passes are required:
 
@@ -174,28 +174,35 @@ const OrganizedFinding = z
   .object({
     id: z.string().regex(/^ORG-\d{3,}$/),
     status: Status,
-    title: z.string().min(1),
-    program: z.string().min(1),
-    instruction: z.string().min(1),
-    class: z.string().min(1),
+    // Core content fields are relaxed to allow empty strings so a malformed or
+    // partial candidate can be preserved losslessly as demote/rejected via
+    // rawBlock + parseWarning. Confirmed findings must fill them (see refine).
+    title: z.string(),
+    program: z.string(),
+    instruction: z.string(),
+    class: z.string(),
     severity: Severity.nullable(),
     confidence: Confidence.nullable(),
     sourceCandidates: z.array(CandidateRef).min(1),
     agents: z.array(z.string().min(1)).min(1),
-    description: z.string().min(1),
-    rootCause: z.string().min(1),
-    attackPath: z.string().min(1),
-    impact: z.string().min(1),
-    validation: z.array(GateResult).min(1),
+    description: z.string(),
+    rootCause: z.string(),
+    attackPath: z.string(),
+    impact: z.string(),
+    validation: z.array(GateResult),
     statusRationale: z.string().min(1),
     recommendedFix: z.string().optional(),
     remainingUncertainty: z.string().optional(),
+    // Set on demote/rejected findings preserved from a malformed candidate block.
+    parseWarning: z.string().optional(),
+    rawBlock: z.string().optional(),
   })
-  // Confirmed findings must be scored; rejected/demoted leads may leave
-  // severity/confidence null since they are not carried into the report.
-  .refine((f) => f.status !== "confirmed" || (f.severity !== null && f.confidence !== null), {
-    message: "Confirmed findings require non-null severity and confidence",
-    path: ["severity"],
+  // Confirmed findings must be fully specified and scored (non-null
+  // severity/confidence, non-empty core fields, at least one validation gate);
+  // the relaxed fields above only exist to preserve malformed demote/rejected
+  // candidates. Enforced by a superRefine in the validator.
+  .superRefine((f, ctx) => {
+    /* confirmed => non-null severity/confidence, non-empty core fields, validation.length >= 1 */
   })
 
 const OrganizeOutput = z.object({
