@@ -8,14 +8,14 @@ Sollama supports both native Rust programs and programs written in common framew
 
 Sollama ships as both a Claude Code and a Codex plugin. Clone the repo:
 
-```
+```bash
 git clone https://github.com/parketh/sollama.git
 cd sollama
 ```
 
 Then, add the local marketplace and install:
 
-```
+```bash
 # Claude Code
 /plugin marketplace add <path/to/sollama>
 /plugin install sollama@sollama
@@ -46,6 +46,14 @@ Each step consumes the target repo and prior artifacts, and blocks with a clear 
 ```
 
 Step 4 is the key step that generates candidate findings. It fans out 18 specialist agents in parallel, each applying a distinct lens (invariants, access control, economic security, etc).
+
+## Spec-driven development
+
+Sollama uses spec-driven development to guide feature development.
+
+With agents, any well-defined spec can be trivially handed off for implementation. Specs therefore replace code as the primary artifact of software development. 
+
+New features should be described in a numbered spec in `specs/` before implementation. Post-implementation updates, particularly where they deviate from the plan, should be reflected in a `## Post-Implementation Changes` section. This keeps documentation and code in sync.
 
 ## License
 
