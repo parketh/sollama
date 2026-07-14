@@ -15,5 +15,5 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true
   },
-  "include": ["skills/**/*.ts"]
+  "include": ["skills/**/*.ts", "scripts/**/*.ts"]
 }
