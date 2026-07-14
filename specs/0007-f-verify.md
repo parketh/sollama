@@ -47,6 +47,8 @@ Verify only attempts findings from `organized-findings.json` where: `finding.sta
 
 Findings with `status: "demote"` or `status: "rejected"` fall out at organize and are omitted from verification output.
 
+Verification must be exhaustive over confirmed findings: `results` contains exactly one entry per `confirmed` finding in `organized-findings.json`. When a fair attempt is impossible, still emit a result with `status: "unreproduced"` or `"blocked"` rather than dropping the finding.
+
 Verification must not mutate the user’s working copy directly. When adding tests, fixtures, or harnesses, use a temporary worktree or branch at the pinned commit. Copy resulting patches, test files, logs, and command outputs back into the audit `pocs/` directory.
 
 ## Verification Rules
@@ -194,7 +196,7 @@ If any path is missing, ask the user for it.
 ## Procedure
 
 1. Read all inputs. Upstream status guard: if `prepare-output.json` `status` is `"blocked"` or `organized-findings.json` `status` is `"blocked"`, stop and report the upstream blockers; do not verify. The operator must resolve the upstream block and re-run that step first.
-2. Select only findings with `status: "confirmed"` for verification.
+2. Select only findings with `status: "confirmed"` for verification. Every confirmed finding must produce exactly one result — including `unreproduced` or `blocked` — so none silently disappears from the report `g-report` builds from `verification.json`.
 3. Ignore `demote` and `rejected` findings; they fall out at organize and are omitted from `verification.json`.
 4. Create or select a temporary worktree or branch at the pinned commit before writing test code.
 5. For each selected finding, choose method: `test` or `evidence`.
