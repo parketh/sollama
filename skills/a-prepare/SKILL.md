@@ -118,7 +118,7 @@ Required env detection:
 - Record env var names in `detected.env.required`.
 - Record missing env vars in `detected.env.missing`.
 - Use `value` only for non-confidential env vars.
-- Use `valueRef` when a confidential value is present in a file. Confidential env vars should be added to `.env` and referenced here.
+- Use `valueRef` when a confidential value is present in a file. Confidential env vars should be manually added to `.env` by the user, never by the agent; it should then be referenced here under `valueRef` (e.g. `.env:28`).
 
 ## Schema
 
