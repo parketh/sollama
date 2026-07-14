@@ -649,3 +649,9 @@ Manual verification:
 - Framework detection should allow multiple frameworks in monorepos.
 - `anchor test` can start validators and be slow or flaky. Test failure is non-blocking, but the command and failure mode must be captured.
 - Plugin manifest fields should be verified against current platform docs during implementation; this spec gives initial drafts, not a guarantee of current external schema.
+
+## Post-Implementation Changes
+
+Relocated the shared JSON validator out of `skills/` (commit `445d895`):
+
+- **`skills/shared/scripts/validate.ts` → `scripts/shared/validate.ts`.** The generic Zod/JSON runner is repo tooling, not a skill, so it now lives under a top-level `scripts/` tree instead of a `skills/shared/` pseudo-skill.
