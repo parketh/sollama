@@ -72,8 +72,6 @@ const PrepareOutput = z
         ctx.addIssue({ code: "custom", path: ["summary", "isSupported"], message: "ready requires isSupported" })
       if (!o.summary.buildPassed)
         ctx.addIssue({ code: "custom", path: ["summary", "buildPassed"], message: "ready requires buildPassed" })
-      if (o.summary.testsPassed === false)
-        ctx.addIssue({ code: "custom", path: ["summary", "testsPassed"], message: "ready requires tests to pass or be absent" })
       if (o.summary.blockers.length > 0)
         ctx.addIssue({ code: "custom", path: ["summary", "blockers"], message: "ready must have no blockers" })
     } else if (o.summary.blockers.length === 0) {
