@@ -1,0 +1,28 @@
+{
+  "name": "sollama",
+  "version": "0.1.0",
+  "description": "Agentic smart contract auditor for Solana programs.",
+  "author": {
+    "name": "Sollama"
+  },
+  "homepage": "https://github.com/sollama/sollama",
+  "repository": "https://github.com/sollama/sollama",
+  "license": "MIT",
+  "keywords": ["solana", "security", "audit", "smart-contracts", "agentic"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Sollama",
+    "shortDescription": "Agentic smart contract auditor for Solana",
+    "longDescription": "Sollama runs a skill-based audit workflow for Solana programs: prepare, inspect, analyze, organize, verify, and report.",
+    "developerName": "Sollama",
+    "category": "Engineering",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "defaultPrompt": [
+      "Audit this Solana program",
+      "Prepare this repo for an audit",
+      "Run agent fanout on this audit"
+    ],
+    "brandColor": "#111827",
+    "screenshots": []
+  }
+}

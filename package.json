@@ -1,0 +1,22 @@
+{
+  "name": "sollama",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "format": "biome check --write .",
+    "format:check": "biome check .",
+    "typecheck": "tsc --noEmit",
+    "validate:prepare": "bun run skills/a-prepare/scripts/validate-prepare-output.ts",
+    "validate:organize": "bun run skills/e-organize/scripts/validate-organize-output.ts",
+    "validate:verify": "bun run skills/f-verify/scripts/validate-verify-output.ts"
+  },
+  "dependencies": {
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.0.0",
+    "@types/bun": "^1.0.0",
+    "typescript": "^5.0.0"
+  }
+}
