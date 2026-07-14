@@ -216,6 +216,8 @@ const OrganizeOutput = z.object({
 })
 ```
 
+Summary counters must match `findings` (enforced by the validator): `summary.findingsTotal` equals `findings.length`, and `summary.confirmed`/`demote`/`rejected` each equal the count of findings with that `status`.
+
 For `status: "blocked"`, still write a schema-valid `organized-findings.json` when possible. Put blocker details in `summary.blockers` and leave `findings` empty if organization could not proceed.
 
 ## Task 1: Create The Organize Skill

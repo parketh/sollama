@@ -9,13 +9,13 @@ const GateVerdict = z.enum(["passed", "failed", "demote", "not-applicable"])
 
 // FINDING field list authority: agents/common.md (## Output). `key` re-encodes the
 // program/instruction/class identifiers; a field change there flags a parser update.
-const FindingKey = z.object({
+const FindingKey = z.strictObject({
   program: z.string().min(1),
   instruction: z.string().min(1),
   class: z.string().min(1),
 })
 
-const OrganizeInputs = z.object({
+const OrganizeInputs = z.strictObject({
   prepareOutputPath: z.string().min(1),
   inspectFindingsPath: z.string().min(1),
   staticAnalysisPath: z.string().min(1),
@@ -24,7 +24,7 @@ const OrganizeInputs = z.object({
 
 // candidateId is the stable `CAND-XXX` handle assigned by d-agent-fanout's
 // `## Summary` table; it is the primary reference back to a candidate block.
-const CandidateRef = z.object({
+const CandidateRef = z.strictObject({
   candidateId: z.string().regex(/^CAND-\d{3,}$/),
   agentId: z.string().min(1),
   key: FindingKey,
@@ -32,7 +32,7 @@ const CandidateRef = z.object({
   excerpt: z.string().optional(),
 })
 
-const GateResult = z.object({
+const GateResult = z.strictObject({
   gate: GateName,
   verdict: GateVerdict,
   rationale: z.string().min(1),
@@ -40,7 +40,7 @@ const GateResult = z.object({
 })
 
 const OrganizedFinding = z
-  .object({
+  .strictObject({
     id: z.string().regex(/^ORG-\d{3,}$/),
     status: Status,
     title: z.string().min(1),
@@ -67,21 +67,41 @@ const OrganizedFinding = z
     path: ["severity"],
   })
 
-const OrganizeOutput = z.object({
-  schemaVersion: z.literal("1.0"),
-  step: z.literal("organize"),
-  status: z.enum(["ready", "blocked"]),
-  inputs: OrganizeInputs,
-  summary: z.object({
-    candidateBlocks: z.number().int().nonnegative(),
-    findingsTotal: z.number().int().nonnegative(),
-    confirmed: z.number().int().nonnegative(),
-    demote: z.number().int().nonnegative(),
-    rejected: z.number().int().nonnegative(),
-    blockers: z.array(z.string()),
-    warnings: z.array(z.string()),
-  }),
-  findings: z.array(OrganizedFinding),
-})
+const OrganizeOutput = z
+  .strictObject({
+    schemaVersion: z.literal("1.0"),
+    step: z.literal("organize"),
+    status: z.enum(["ready", "blocked"]),
+    inputs: OrganizeInputs,
+    summary: z.strictObject({
+      candidateBlocks: z.number().int().nonnegative(),
+      findingsTotal: z.number().int().nonnegative(),
+      confirmed: z.number().int().nonnegative(),
+      demote: z.number().int().nonnegative(),
+      rejected: z.number().int().nonnegative(),
+      blockers: z.array(z.string()),
+      warnings: z.array(z.string()),
+    }),
+    findings: z.array(OrganizedFinding),
+  })
+  // Summary counters must match the findings array so downstream consumers and
+  // the report cannot be misled by a stale or hand-edited summary.
+  .superRefine((o, ctx) => {
+    const count = (s: string) => o.findings.filter((f) => f.status === s).length
+    const checks: [string, number, number][] = [
+      ["findingsTotal", o.summary.findingsTotal, o.findings.length],
+      ["confirmed", o.summary.confirmed, count("confirmed")],
+      ["demote", o.summary.demote, count("demote")],
+      ["rejected", o.summary.rejected, count("rejected")],
+    ]
+    for (const [field, got, want] of checks) {
+      if (got !== want)
+        ctx.addIssue({
+          code: "custom",
+          path: ["summary", field],
+          message: `summary.${field} (${got}) must equal ${want}`,
+        })
+    }
+  })
 
 validateJsonFile(OrganizeOutput, process.argv[2], "organized-findings.json")
