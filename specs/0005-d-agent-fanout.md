@@ -332,3 +332,14 @@ Manual output review:
 - Injecting common rules increases prompt size. If context becomes tight, the fanout skill should still inject common rules rather than relying on relative markdown links.
 - Some common-rule examples are not Solana-specific. The composed prompt must anchor every agent back to Rust Solana audit scope.
 - Candidate blocks are markdown and may be imperfect. This is acceptable because `e-organize` applies judgement over the combined artifact.
+
+## Post-Implementation Changes
+
+Restructured the combined `candidate-findings.md` to be table-first and scannable at any candidate count (commit `88c5eba`):
+
+- **Stable candidate ids.** Every candidate now gets a zero-padded, sequential `CAND-XXX` id, ordered by agent relative path then order within the agent file, so reruns renumber identically. Ids anchor the tables and give `e-organize` a stable handle.
+- **New `## Summary` table.** One row per candidate (`ID | Sev | Conf | Program | Instruction | Class | Agent | Description`), sorted by program, instruction, severity — a scannable index over all candidates.
+- **New `## Convergence` table.** Clusters two or more candidates hitting the same surface by their `CAND-XXX` ids, surfacing overlap for `e-organize`'s dedup passes. Pointing at overlap is not merging.
+- **Grouping key changed.** Full blocks now group under `### <program> / <instruction>` headings instead of `(program, instruction, class)`. `class` is a free-text kebab tag that fragments into one-block-per-group; `(program, instruction)` collides usefully and mirrors `e-organize`'s Pass 2 key.
+- **Field discipline.** Only the canonical `FINDING` fields are carried into the aggregate; agent-specific optional fields (`seam`, `assumption`, `violation`, `pair_or_branch`, etc.) stay in the per-agent `fanout/<agent-file-id>.md`, which remains the lossless record. This was the main source of unreadable, over-long blocks.
+- **`## Agent Runs` columns simplified** (dropped `Prompt` and per-block columns), and `## Notes` now also records zero-finding agents.

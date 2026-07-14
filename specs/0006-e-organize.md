@@ -493,3 +493,11 @@ Manual output review:
 - Candidate markdown may be inconsistent. The organizer should preserve imperfect evidence rather than silently dropping it.
 - Over-merging is more dangerous than under-merging. Duplicates can be resolved later, but merged distinct bugs may disappear.
 - Solidity-auditor references are useful for judgement discipline, but all rules must be adapted to Rust Solana execution, accounts, signer checks, PDAs, CPIs, and deployment assumptions.
+
+## Post-Implementation Changes
+
+Consequential edits to align organize with the restructured `candidate-findings.md` (commit `4afc60e`):
+
+- **`CandidateRef` schema updated.** Added `candidateId` (`CAND-XXX` regex) as the primary reference back to a candidate block, made `sourceFile` optional, and dropped `blockIndex`. The `CAND-XXX` handle assigned by `d-agent-fanout`'s `## Summary` table replaces the old file+index reference.
+- **Procedure step 2 expanded.** The parser now records each block's `CAND-XXX` id as `sourceCandidates[].candidateId`; the `## Summary` and `## Convergence` tables seed the Pass 1 / Pass 2 dedup; and blocks needing more context than their canonical fields are resolved from the per-agent `fanout/<agent-file-id>.md`, since agent-specific optional fields no longer live in `candidate-findings.md`.
+- **Markdown template.** `Source candidates:` lines now annotate that they take `CAND-XXX` ids from `candidate-findings.md`'s `## Summary`.
