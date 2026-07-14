@@ -49,7 +49,7 @@ Sort agents by relative path before launch so repeated runs are stable.
 4. Discover specialist agents under the installed plugin's `agents/lenses/*.md`, `agents/mechanics/*.md`, and `agents/gaps/*.md`.
 5. Sort agents by relative path and derive stable agent IDs.
 6. For each specialist agent, compose a prompt by injecting `agents/common.md` into its `## Common rules` section and appending the audit context plus assigned output path.
-7. Launch all specialist agents in parallel using the current agent harness's subagent/parallel execution facility.
+7. Create the `fanout/` output directory under the audit root, then launch all specialist agents in parallel using the current agent harness's subagent/parallel execution facility.
 8. Require each agent to write one output file under `fanout/<agent-file-id>.md`.
 9. Retry failed or missing agent runs once if the failure is transient.
 10. If any required agent still fails, write `candidate-findings.md` with status `blocked` unless the user explicitly excludes that agent.
