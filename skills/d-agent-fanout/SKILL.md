@@ -52,7 +52,7 @@ Sort agents by relative path before launch so repeated runs are stable.
 7. Require each agent to write one output file under `fanout/<agent-file-id>.md`.
 8. Retry failed or missing agent runs once if the failure is transient.
 9. If any required agent still fails, write `candidate-findings.md` with status `blocked` unless the user explicitly excludes that agent.
-10. Aggregate per-agent outputs into `candidate-findings.md`.
+10. Aggregate per-agent outputs into `candidate-findings.md`: assign `CAND-XXX` ids, build the `## Summary` and `## Convergence` tables, then the grouped full blocks.
 11. Preserve candidate blocks, agent provenance, malformed blocks, and parse warnings without deduping or merging findings.
 
 ## Prompt Composition
@@ -107,13 +107,21 @@ Use the section order from `skills/d-agent-fanout/templates/candidate-findings.t
 
 ## Aggregation Rules
 
-Do not dedupe, classify, or merge candidate findings.
+Do not dedupe, classify, or merge candidate findings. That work belongs to `e-organize`.
 
-Group by `(program, instruction, class)` only as a readability aid. Treat the key as a guard, not a merge rule. Key mismatches usually mean findings are not duplicates; key matches still require later LLM judgement in `e-organize`.
+Use the section order from `skills/d-agent-fanout/templates/candidate-findings.template.md`. The aggregate is table-first so it stays scannable:
 
-Preserve malformed candidate blocks with `parse_warning` rather than dropping them. Later steps can often infer intent from imperfect markdown.
+1. **Ids.** Assign every candidate a stable `CAND-XXX` id (zero-padded, sequential). Order deterministically: by agent relative path, then by order within the agent file, so reruns renumber identically.
+2. **`## Summary` table.** One row per candidate: `ID | Sev | Conf | Program | Instruction | Class | Agent | Description`. Sort by program, then instruction, then severity (high → info). Keep `Description` to one short clause (≤ 12 words). This is the scannable index over all candidates.
+3. **`## Convergence` table.** List clusters where two or more candidates hit the same surface, with their member `CAND-XXX` ids and a one-line note. This surfaces multi-agent overlap for `e-organize`'s dedup passes. Omit singletons. Pointing at overlap is not merging.
+4. **`## Candidate Findings` blocks.** Group full blocks under `### <program> / <instruction>` headings — NOT by `class`. `class` is a free-text kebab tag each agent invents; grouping on it fragments into one-block-per-group. Grouping on `(program, instruction)` collides usefully and mirrors `e-organize`'s Pass 2 key. Prefix each block with its `CAND-XXX` id and a `Source agent:` line.
 
-The `FINDING` block format is defined once in `agents/common.md` (`## Output`) and is the single source of truth. Do not restate the field list in the aggregated artifact; copy each agent's block verbatim.
+Field discipline keeps blocks readable:
+
+- Copy the canonical `FINDING` fields (`program`, `instruction`, `class`, `description`, `severity`, `confidence`, `path`, `proof`, `fix`) defined once in `agents/common.md` (`## Output`) — the single source of truth. Do not restate the field list.
+- Do NOT carry agent-specific optional fields (e.g. `seam`, `assumption`, `violation`, `pair_or_branch`) into `candidate-findings.md`. They stay in the per-agent `fanout/<agent-file-id>.md`, which `e-organize` can consult when a block needs more context. Keep each carried field terse.
+
+Preserve malformed candidate blocks with a `parse_warning:` line rather than dropping them. Later steps can often infer intent from imperfect markdown.
 
 ## Handoff
 
