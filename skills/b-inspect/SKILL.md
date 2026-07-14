@@ -17,7 +17,7 @@ Required input:
 
 If the path is missing, ask the user for it.
 
-Upstream status guard: read `prepare-output.json` first. If `status` is `"blocked"`, stop and report the upstream blockers from `summary.blockers`; do not inspect. The operator must resolve the prepare block and re-run `a-prepare` before this step.
+Upstream status guard: read `prepare-output.json` first. If `status` is `"blocked"`, write a blocked `inspect-findings.md` (metadata `Status: blocked`) recording the upstream blockers from `summary.blockers`, then stop; do not inspect. The operator must resolve the prepare block and re-run `a-prepare` before this step.
 
 Read `prepare-output.json` before inspecting the repository. Use:
 
@@ -78,7 +78,7 @@ Write:
 <target-repo>/.sollama/audits/<audit-id>/inspect-findings.md
 ```
 
-Use the section order from `skills/b-inspect/templates/inspect-findings.template.md`.
+Use the section order from `skills/b-inspect/templates/inspect-findings.template.md`. Set metadata `Status: ready` on a successful inspection and `Status: blocked` when inspection cannot proceed, so downstream skills can guard on it.
 
 ## Scope Expansion
 

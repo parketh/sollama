@@ -2,6 +2,7 @@
 
 ## Metadata
 
+- Status: ready | blocked
 - Audit ID: <audit-id>
 - Target repo: <route-to-target-repo>
 - Pinned commit: <commit-hash>
