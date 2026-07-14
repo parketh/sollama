@@ -45,7 +45,7 @@ Each step consumes the target repo and prior artifacts, and blocks with a clear 
 <target-repo>/.sollama/audits/<audit-id>/
 ```
 
-Step 4 is the key step that generates candidate findings. It fans out 18 specialist agents in parallel, each applying a distinct lens (invariants, access control, economic security, etc).
+Step 4 is the key step that generates candidate findings. It fans out 18 specialist agents in parallel, each applying a distinct lens (invariants, access control, economic security, etc.).
 
 ## Spec-driven development
 
