@@ -170,26 +170,33 @@ const GateResult = z.object({
   evidence: z.array(z.string()).default([]),
 })
 
-const OrganizedFinding = z.object({
-  id: z.string().regex(/^ORG-\d{3,}$/),
-  status: Status,
-  title: z.string().min(1),
-  program: z.string().min(1),
-  instruction: z.string().min(1),
-  class: z.string().min(1),
-  severity: Severity.nullable(),
-  confidence: Confidence.nullable(),
-  sourceCandidates: z.array(CandidateRef).min(1),
-  agents: z.array(z.string().min(1)).min(1),
-  description: z.string().min(1),
-  rootCause: z.string().min(1),
-  attackPath: z.string().min(1),
-  impact: z.string().min(1),
-  validation: z.array(GateResult).min(1),
-  statusRationale: z.string().min(1),
-  recommendedFix: z.string().optional(),
-  remainingUncertainty: z.string().optional(),
-})
+const OrganizedFinding = z
+  .object({
+    id: z.string().regex(/^ORG-\d{3,}$/),
+    status: Status,
+    title: z.string().min(1),
+    program: z.string().min(1),
+    instruction: z.string().min(1),
+    class: z.string().min(1),
+    severity: Severity.nullable(),
+    confidence: Confidence.nullable(),
+    sourceCandidates: z.array(CandidateRef).min(1),
+    agents: z.array(z.string().min(1)).min(1),
+    description: z.string().min(1),
+    rootCause: z.string().min(1),
+    attackPath: z.string().min(1),
+    impact: z.string().min(1),
+    validation: z.array(GateResult).min(1),
+    statusRationale: z.string().min(1),
+    recommendedFix: z.string().optional(),
+    remainingUncertainty: z.string().optional(),
+  })
+  // Confirmed findings must be scored; rejected/demoted leads may leave
+  // severity/confidence null since they are not carried into the report.
+  .refine((f) => f.status !== "confirmed" || (f.severity !== null && f.confidence !== null), {
+    message: "Confirmed findings require non-null severity and confidence",
+    path: ["severity"],
+  })
 
 const OrganizeOutput = z.object({
   schemaVersion: z.literal("1.0"),
@@ -256,7 +263,7 @@ If any path is missing, ask the user for it.
 8. Run the completeness gate: every unique `(program, instruction)` in the candidates must map to at least one organized finding, else record the drop in `summary.warnings`.
 9. For each resulting item, run the four validation gates in order.
 10. Assign `status: "confirmed" | "rejected" | "demote"`.
-11. Assign severity and confidence when meaningful; use `null` when rejected data should not be scored.
+11. Confirmed findings must carry a non-null severity and confidence. Rejected or demoted leads may leave both `null`, since they are not carried into the report.
 12. Write `organized-findings.json`.
 13. Run `bun run skills/e-organize/scripts/validate-organize-output.ts <path-to-organized-findings.json>`.
 14. Fix schema issues and re-run validation until it passes or the step is blocked.
@@ -495,6 +502,10 @@ Manual output review:
 - Solidity-auditor references are useful for judgement discipline, but all rules must be adapted to Rust Solana execution, accounts, signer checks, PDAs, CPIs, and deployment assumptions.
 
 ## Post-Implementation Changes
+
+Relocated the shared JSON validator out of `skills/` (commit `445d895`):
+
+- **`skills/shared/scripts/validate.ts` → `scripts/shared/validate.ts`.** The generic Zod/JSON runner is repo tooling, not a skill, so it now lives under a top-level `scripts/` tree instead of a `skills/shared/` pseudo-skill.
 
 Consequential edits to align organize with the restructured `candidate-findings.md` (commit `4afc60e`):
 

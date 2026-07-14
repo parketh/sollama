@@ -39,26 +39,33 @@ const GateResult = z.object({
   evidence: z.array(z.string()).default([]),
 })
 
-const OrganizedFinding = z.object({
-  id: z.string().regex(/^ORG-\d{3,}$/),
-  status: Status,
-  title: z.string().min(1),
-  program: z.string().min(1),
-  instruction: z.string().min(1),
-  class: z.string().min(1),
-  severity: Severity.nullable(),
-  confidence: Confidence.nullable(),
-  sourceCandidates: z.array(CandidateRef).min(1),
-  agents: z.array(z.string().min(1)).min(1),
-  description: z.string().min(1),
-  rootCause: z.string().min(1),
-  attackPath: z.string().min(1),
-  impact: z.string().min(1),
-  validation: z.array(GateResult).min(1),
-  statusRationale: z.string().min(1),
-  recommendedFix: z.string().optional(),
-  remainingUncertainty: z.string().optional(),
-})
+const OrganizedFinding = z
+  .object({
+    id: z.string().regex(/^ORG-\d{3,}$/),
+    status: Status,
+    title: z.string().min(1),
+    program: z.string().min(1),
+    instruction: z.string().min(1),
+    class: z.string().min(1),
+    severity: Severity.nullable(),
+    confidence: Confidence.nullable(),
+    sourceCandidates: z.array(CandidateRef).min(1),
+    agents: z.array(z.string().min(1)).min(1),
+    description: z.string().min(1),
+    rootCause: z.string().min(1),
+    attackPath: z.string().min(1),
+    impact: z.string().min(1),
+    validation: z.array(GateResult).min(1),
+    statusRationale: z.string().min(1),
+    recommendedFix: z.string().optional(),
+    remainingUncertainty: z.string().optional(),
+  })
+  // Confirmed findings must be scored; rejected/demoted leads may leave
+  // severity/confidence null since they are not carried into the report.
+  .refine((f) => f.status !== "confirmed" || (f.severity !== null && f.confidence !== null), {
+    message: "Confirmed findings require non-null severity and confidence",
+    path: ["severity"],
+  })
 
 const OrganizeOutput = z.object({
   schemaVersion: z.literal("1.0"),

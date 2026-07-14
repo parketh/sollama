@@ -32,7 +32,7 @@ If any path is missing, ask the user for it.
 8. Run the completeness gate: every unique `(program, instruction)` in the candidates must map to at least one organized finding, else record the drop in `summary.warnings`.
 9. For each resulting item, run the four validation gates in order.
 10. Assign `status: "confirmed" | "rejected" | "demote"`.
-11. Assign severity and confidence when meaningful; use `null` when rejected data should not be scored.
+11. Confirmed findings must carry a non-null severity and confidence. Rejected or demoted leads may leave both `null`, since they are not carried into the report.
 12. Write `organized-findings.json`.
 13. Run `bun run skills/e-organize/scripts/validate-organize-output.ts <path-to-organized-findings.json>`.
 14. Fix schema issues and re-run validation until it passes or the step is blocked.

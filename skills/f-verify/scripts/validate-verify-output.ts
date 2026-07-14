@@ -22,28 +22,38 @@ const CommandResult = z.object({
   outputRef: z.string().optional(),
 })
 
-const VerificationResult = z.object({
-  findingId: z.string().regex(/^ORG-\d{3,}$/),
-  status: VerificationStatus,
-  method: VerificationMethod,
-  title: z.string().min(1),
-  // Display fields carried forward from the organized finding so
-  // verification.json is self-contained for g-report. See "Carry-Forward Rules".
-  program: z.string().min(1),
-  instruction: z.string().min(1),
-  class: z.string().min(1),
-  description: z.string().min(1),
-  impact: z.string().min(1),
-  recommendedFix: z.string().optional(),
-  // severity is carried from organize but MAY be reclassified here based on
-  // reproduced impact. null only for results that cannot be scored.
-  severity: Severity.nullable(),
-  rationale: z.string().min(1),
-  evidence: z.array(z.string()).default([]),
-  commands: z.array(CommandResult).default([]),
-  artifacts: z.array(ArtifactRef).default([]),
-  notes: z.string().optional(),
-})
+const VerificationResult = z
+  .object({
+    findingId: z.string().regex(/^ORG-\d{3,}$/),
+    status: VerificationStatus,
+    method: VerificationMethod,
+    title: z.string().min(1),
+    // Display fields carried forward from the organized finding so
+    // verification.json is self-contained for g-report. See "Carry-Forward Rules".
+    program: z.string().min(1),
+    instruction: z.string().min(1),
+    class: z.string().min(1),
+    description: z.string().min(1),
+    impact: z.string().min(1),
+    recommendedFix: z.string().optional(),
+    // severity is carried from organize but MAY be reclassified here based on
+    // reproduced impact. null only for results that cannot be scored.
+    severity: Severity.nullable(),
+    rationale: z.string().min(1),
+    evidence: z.array(z.string()).default([]),
+    commands: z.array(CommandResult).default([]),
+    artifacts: z.array(ArtifactRef).default([]),
+    notes: z.string().optional(),
+  })
+  // Reproduced results (verified / evidence-confirmed) must carry a severity;
+  // unreproduced or blocked results may leave it null.
+  .refine(
+    (r) => (r.status !== "verified" && r.status !== "evidence-confirmed") || r.severity !== null,
+    {
+      message: "verified and evidence-confirmed results require a non-null severity",
+      path: ["severity"],
+    },
+  )
 
 const VerifyOutput = z.object({
   schemaVersion: z.literal("1.0"),

@@ -127,6 +127,15 @@ const VerificationResult = z.object({
   artifacts: z.array(ArtifactRef).default([]),
   notes: z.string().optional(),
 })
+  // Reproduced results (verified / evidence-confirmed) must carry a severity;
+  // unreproduced or blocked results may leave it null.
+  .refine(
+    (r) => (r.status !== "verified" && r.status !== "evidence-confirmed") || r.severity !== null,
+    {
+      message: "verified and evidence-confirmed results require a non-null severity",
+      path: ["severity"],
+    },
+  )
 
 const VerifyOutput = z.object({
   schemaVersion: z.literal("1.0"),
@@ -361,3 +370,9 @@ Manual output review:
 - Temporary worktrees can be messy. The skill must copy all relevant artifacts back to the audit directory.
 - Info-class issues need judgement: they can be evidence-confirmed, but should not be inflated into exploit findings.
 - Verification may require adding project-specific tests; keep those artifacts focused and tied to finding IDs.
+
+## Post-Implementation Changes
+
+Relocated the shared JSON validator out of `skills/` (commit `445d895`):
+
+- **`skills/shared/scripts/validate.ts` → `scripts/shared/validate.ts`.** The generic Zod/JSON runner is repo tooling, not a skill, so it now lives under a top-level `scripts/` tree instead of a `skills/shared/` pseudo-skill.
