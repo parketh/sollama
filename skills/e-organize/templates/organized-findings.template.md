@@ -27,7 +27,7 @@
 - Class:
 - Severity:
 - Confidence:
-- Source candidates:
+- Source candidates: (CAND-XXX ids from candidate-findings.md `## Summary`)
 
 Description:
 
@@ -47,7 +47,7 @@ Recommended fix:
 
 - Reason:
 - Remaining uncertainty:
-- Source candidates:
+- Source candidates: (CAND-XXX ids)
 
 ## Rejected
 
@@ -55,4 +55,4 @@ Recommended fix:
 
 - Reason:
 - Blocking gate:
-- Source candidates:
+- Source candidates: (CAND-XXX ids)

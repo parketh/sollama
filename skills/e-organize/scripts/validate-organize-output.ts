@@ -22,11 +22,13 @@ const OrganizeInputs = z.object({
   candidateFindingsPath: z.string().min(1),
 })
 
+// candidateId is the stable `CAND-XXX` handle assigned by d-agent-fanout's
+// `## Summary` table; it is the primary reference back to a candidate block.
 const CandidateRef = z.object({
+  candidateId: z.string().regex(/^CAND-\d{3,}$/),
   agentId: z.string().min(1),
-  sourceFile: z.string().min(1),
-  blockIndex: z.number().int().nonnegative(),
   key: FindingKey,
+  sourceFile: z.string().min(1).optional(),
   excerpt: z.string().optional(),
 })
 

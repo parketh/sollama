@@ -23,7 +23,7 @@ If any path is missing, ask the user for it.
 ## Procedure
 
 1. Read all inputs. Upstream status guard: if `prepare-output.json` `status` is `"blocked"` or `candidate-findings.md` metadata `Status` is `blocked`, stop and report the upstream blockers; do not organize. The operator must resolve the upstream block and re-run that step first.
-2. Parse candidate `FINDING` blocks from `candidate-findings.md`.
+2. Parse candidate `FINDING` blocks from `candidate-findings.md`. Each block carries a `CAND-XXX` id (from the `## Summary` table); record it as the `sourceCandidates[].candidateId` handle for every organized finding it feeds. The `## Summary` and `## Convergence` tables seed the Pass 1 / Pass 2 dedup below; if a block needs more context than its canonical fields, consult the per-agent `fanout/<agent-file-id>.md` (agent-specific optional fields live there, not in `candidate-findings.md`).
 3. Preserve malformed candidate blocks as `demote` or `rejected`; do not silently drop them.
 4. Group candidates by `(program, instruction, class)` as a comparison aid (Pass 1).
 5. Split candidates that have different root causes, fixes, impacts, or attack paths.

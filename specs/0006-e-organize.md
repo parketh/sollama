@@ -153,11 +153,13 @@ const OrganizeInputs = z.object({
   candidateFindingsPath: z.string().min(1),
 })
 
+// candidateId is the stable `CAND-XXX` handle assigned by d-agent-fanout's
+// `## Summary` table; it is the primary reference back to a candidate block.
 const CandidateRef = z.object({
+  candidateId: z.string().regex(/^CAND-\d{3,}$/),
   agentId: z.string().min(1),
-  sourceFile: z.string().min(1),
-  blockIndex: z.number().int().nonnegative(),
   key: FindingKey,
+  sourceFile: z.string().min(1).optional(),
   excerpt: z.string().optional(),
 })
 
@@ -245,7 +247,7 @@ If any path is missing, ask the user for it.
 ## Procedure
 
 1. Read all inputs. Upstream status guard: if `prepare-output.json` `status` is `"blocked"` or `candidate-findings.md` metadata `Status` is `blocked`, stop and report the upstream blockers; do not organize. The operator must resolve the upstream block and re-run that step first.
-2. Parse candidate `FINDING` blocks from `candidate-findings.md`.
+2. Parse candidate `FINDING` blocks from `candidate-findings.md`. Each block carries a `CAND-XXX` id (from the `## Summary` table); record it as the `sourceCandidates[].candidateId` handle for every organized finding it feeds. The `## Summary` and `## Convergence` tables seed Pass 1 / Pass 2; agent-specific optional fields live in `fanout/<agent-file-id>.md`, not in `candidate-findings.md`.
 3. Preserve malformed candidate blocks as `demote` or `rejected`; do not silently drop them.
 4. Group candidates by `(program, instruction, class)` as a comparison aid (Pass 1).
 5. Split candidates that have different root causes, fixes, impacts, or attack paths.
