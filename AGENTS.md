@@ -17,6 +17,13 @@ Sollama is an agentic smart contract auditor for Solana smart contracts. Gather 
 - No live RPC or explorer queries.
 - When editing a phase, keep its artifact contract in sync with `specs/`.
 
+## Plugin manifests
+
+Sollama ships as both a Codex and a Claude Code plugin, each with its own required manifest location. Update both when plugin metadata changes:
+
+- Codex: root `marketplace.json` (+ `.codex-plugin/plugin.json`).
+- Claude Code: `.claude-plugin/marketplace.json` (+ `.claude-plugin/plugin.json`).
+
 ## Pointers
 
 - `scripts/`: reusable scripts encoding deterministic runnable steps
