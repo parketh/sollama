@@ -125,6 +125,8 @@ const PrepareOutput = z.object({
 
 Use absolute paths for `inputs.repoPath` and command `cwd`. Do not include confidential env var values in `value`; use `valueRef` only when a non-confidential value is present in a file and the reference helps the auditor.
 
+Readiness invariants (enforced by the validator): `status: "ready"` requires `summary.isSupported`, `summary.buildPassed`, no `summary.blockers`, and `summary.testsPassed` not `false` (tests may be absent/`null`); `status: "blocked"` requires at least one `summary.blockers` entry.
+
 ## Task 1: Add Root Validator Tooling
 
 **Objective:** Create the minimal Bun/Biome/TypeScript project surface used by prepare and later skill validators.
