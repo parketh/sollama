@@ -6,7 +6,7 @@
 
 **Architecture:** `f-verify` is an independently runnable skill with a JSON-canonical output. It consumes `prepare-output.json` and `organized-findings.json`, verifies findings with `status: "confirmed"` from organize, creates test artifacts under `pocs/` when needed, and validates the JSON artifact with Zod.
 
-**Tech Stack:** Markdown skill files, Bun, TypeScript, Zod, shared JSON validation helper, target repo native Rust/Solana/Anchor test tooling, temporary worktrees or branches.
+**Tech Stack:** Markdown skill files, Bun, TypeScript, Zod, shared JSON validation helper, target repo native Rust/Solana/Anchor test tooling, temporary worktrees or isolated clones.
 
 ---
 
@@ -49,7 +49,7 @@ Findings with `status: "demote"` or `status: "rejected"` fall out at organize an
 
 Verification must be exhaustive over confirmed findings: `results` contains exactly one entry per `confirmed` finding in `organized-findings.json`. When a fair attempt is impossible, still emit a result with `status: "unreproduced"` or `"blocked"` rather than dropping the finding.
 
-Verification must not mutate the user’s working copy directly. When adding tests, fixtures, or harnesses, use a temporary worktree or branch at the pinned commit. Copy resulting patches, test files, logs, and command outputs back into the audit `pocs/` directory.
+Verification must not mutate the user’s working copy directly. When adding tests, fixtures, or harnesses, use a temporary worktree or isolated clone at the pinned commit — not a branch in the user’s existing working tree. Copy resulting patches, test files, logs, and command outputs back into the audit `pocs/` directory.
 
 ## Verification Rules
 
@@ -198,7 +198,7 @@ If any path is missing, ask the user for it.
 1. Read all inputs. Upstream status guard: if `prepare-output.json` `status` is `"blocked"` or `organized-findings.json` `status` is `"blocked"`, stop and report the upstream blockers; do not verify. The operator must resolve the upstream block and re-run that step first.
 2. Select only findings with `status: "confirmed"` for verification. Every confirmed finding must produce exactly one result — including `unreproduced` or `blocked` — so none silently disappears from the report `g-report` builds from `verification.json`.
 3. Ignore `demote` and `rejected` findings; they fall out at organize and are omitted from `verification.json`.
-4. Create or select a temporary worktree or branch at the pinned commit before writing test code.
+4. Create or select a temporary worktree or isolated clone at the pinned commit before writing test code.
 5. For each selected finding, choose method: `test` or `evidence`.
 6. Use `method: "evidence"` only for info-class or non-exploit findings where reproduction is not meaningful.
 7. For exploitability findings, add or run a focused test that demonstrates the claimed harm.
@@ -226,7 +226,7 @@ Use `method: "none"` for blocked results where no fair verification method could
 
 Do not mutate the user’s working copy directly for tests.
 
-Use a temporary worktree or branch at the pinned commit.
+Use a temporary worktree or isolated clone at the pinned commit. A branch in the user’s existing working tree is not an acceptable substitute: it does not isolate filesystem changes.
 
 Copy artifacts back into `pocs/<finding-id>/`.
 
