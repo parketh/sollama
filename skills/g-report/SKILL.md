@@ -24,7 +24,7 @@ If any required path is missing, ask the user for it.
 
 ## Procedure
 
-1. Read `prepare-output.json`. Upstream status guard: if `prepare-output.json` `status` is `"blocked"` or `verification.json` `status` is `"blocked"`, report the upstream blockers prominently; generate the report only from whatever results exist and mark it as produced from a blocked upstream. Do not present a blocked run as a complete audit.
+1. Read `prepare-output.json`. Upstream status guard: if `prepare-output.json` `status` is `"blocked"` or `verification.json` `status` is `"blocked"`, stop and report the upstream blockers; do not generate a report. The operator must resolve the upstream block and re-run that step first, so a blocked run can never be presented as a complete audit.
 2. Read `verification.json`.
 3. Read available artifact references under `pocs/`.
 4. Build report content from verification results.
