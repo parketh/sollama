@@ -14,7 +14,7 @@
     "confirmed": 0,
     "demote": 0,
     "rejected": 0,
-    "blockers": [],
+    "blockers": ["<why organization was blocked, e.g. upstream candidate-findings.md is blocked>"],
     "warnings": []
   },
   "findings": []

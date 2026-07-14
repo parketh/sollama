@@ -13,7 +13,7 @@
     "evidenceConfirmed": 0,
     "unreproduced": 0,
     "blocked": 0,
-    "blockers": [],
+    "blockers": ["<why verification was blocked, e.g. upstream organized-findings.json is blocked>"],
     "warnings": []
   },
   "results": []
