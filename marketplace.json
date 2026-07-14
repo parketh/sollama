@@ -1,7 +1,7 @@
 {
-  "name": "sollama-dev",
+  "name": "sollama",
   "interface": {
-    "displayName": "Sollama Dev"
+    "displayName": "Sollama"
   },
   "plugins": [
     {

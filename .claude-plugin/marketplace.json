@@ -1,7 +1,5 @@
 {
-  "name": "sollama-dev",
+  "name": "sollama",
   "owner": { "name": "Sollama" },
-  "plugins": [
-    { "name": "sollama", "source": "./" }
-  ]
+  "plugins": [{ "name": "sollama", "source": "./" }]
 }
