@@ -4,7 +4,7 @@
 
 **Goal:** Build the `c-static-analysis` skill that runs required Solana static-analysis tools, records their command outputs, and triages their findings into a strict-section markdown report.
 
-**Architecture:** `c-static-analysis` is an independently runnable markdown skill. It consumes `prepare-output.json`, checks for configured required tools, asks before any tool installation, runs each required scanner, and writes `static-analysis.md`.
+**Architecture:** `c-static-analysis` is an independently runnable markdown skill. It consumes `prepare-output.json` and `inspect-findings.md`, checks for configured required tools, asks before any tool installation, runs each required scanner, and writes `static-analysis.md`.
 
 **Tech Stack:** Markdown skill files, Sec3 X-Ray, Sol-azy, shell commands, target repo build artifacts from prepare.
 
@@ -106,15 +106,16 @@ description: (Step 3/7) Run required Solana static-analysis tools, triage tool f
 
 Use this skill as Step 3 of a Sollama audit.
 
-Static analysis consumes `prepare-output.json`, then writes `static-analysis.md`.
+Static analysis consumes `prepare-output.json` and `inspect-findings.md`, then writes `static-analysis.md`.
 
 ## Inputs
 
 Required inputs:
 
 - path to `<target-repo>/.sollama/audits/<audit-id>/prepare-output.json`
+- path to `<target-repo>/.sollama/audits/<audit-id>/inspect-findings.md`
 
-If the path is missing, ask the user for it.
+If a path is missing, ask the user for it.
 
 Default required tools:
 
@@ -125,7 +126,7 @@ The required tool list can be overridden by explicit user/project context. If no
 
 ## Procedure
 
-1. Read `prepare-output.json`. If its `status` is `"blocked"`, stop and report the upstream blockers from `summary.blockers`; do not run tools. The operator must resolve the prepare block and re-run `a-prepare` first.
+1. Read `prepare-output.json` and `inspect-findings.md`. If `prepare-output.json` `status` is `"blocked"` or `inspect-findings.md` metadata `Status` is `blocked`, stop and report the upstream blockers; do not run tools. The operator must resolve the upstream block and re-run that step first.
 2. Resolve target repo and audit output directory. Confirm the pinned commit is checked out: `git rev-parse HEAD` must equal `inputs.commitHash` and `git status --porcelain` must be empty. If HEAD differs or the working tree is dirty, stop and report a blocker; do not scan a different or modified tree. Do not change the checkout yourself; the operator must set the correct checkout.
 3. Determine required tools.
 4. Consult current upstream docs/repos for required-tool detection, installation, and run commands.
@@ -136,7 +137,7 @@ The required tool list can be overridden by explicit user/project context. If no
 9. Capture command, exit status, stdout/stderr excerpts, generated report locations, and relevant findings.
    If Sol-azy only prints to stdout for the selected command, redirect stdout to an output file and
    record both the command and output file path.
-10. Triage findings into needs review, benign/accepted, informational, or tool failure.
+10. Triage findings into needs review, benign/accepted, informational, or tool failure. Use `inspect-findings.md`'s resolved in-scope file list to scope and prioritise scanner output so this phase covers the same surface as agent fanout; note tool findings outside that scope as informational rather than dropping them.
 11. Write `static-analysis.md`.
 
 ## Tool Rules
@@ -208,6 +209,7 @@ Finish by reporting:
 - Target repo:
 - Pinned commit:
 - Prepared from:
+- Inspected from:
 - Generated at:
 - Status: ready | blocked
 

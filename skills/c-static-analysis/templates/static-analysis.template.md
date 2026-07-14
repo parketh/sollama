@@ -6,6 +6,7 @@
 - Target repo:
 - Pinned commit:
 - Prepared from:
+- Inspected from:
 - Generated at:
 - Status: ready | blocked
 
