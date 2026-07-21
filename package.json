@@ -9,7 +9,9 @@
     "typecheck": "tsc --noEmit",
     "validate:prepare": "bun run skills/a-prepare/scripts/validate-prepare-output.ts",
     "validate:organize": "bun run skills/e-organize/scripts/validate-organize-output.ts",
-    "validate:verify": "bun run skills/f-verify/scripts/validate-verify-output.ts"
+    "validate:verify": "bun run skills/f-verify/scripts/validate-verify-output.ts",
+    "validate:audit": "bun run skills/audit/scripts/validate-run-status.ts",
+    "test:audit": "bun test skills/audit/scripts/*.test.ts"
   },
   "dependencies": {
     "zod": "^4.0.0"
