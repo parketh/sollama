@@ -33,15 +33,12 @@ Run a full audit with `/sollama:audit`. It coordinates all seven phases end to e
 # New run (pass target repo path + commit)
 /sollama:audit <path/to/target-repo> at commit <pinned-commit>
 
-# Resume run (pass path to run-status.json)
+# Resume run (pass path to run-status.json or audit id)
 /sollama:audit resume <target-repo>/.sollama/audits/<audit-id>/run-status.json
+/sollama:audit resume <target-repo> <audit-id>
 ```
 
-Artifacts are written to the target repo at the following path:
-
-```
-<target-repo>/.sollama/audits/<audit-id>/
-```
+Artifacts are written to the target repo at `<target-repo>/.sollama/audits/<audit-id>/`.
 
 ### Running phases independently
 
