@@ -207,6 +207,26 @@ describe("block", () => {
   })
 })
 
+describe("sequencing guards", () => {
+  beforeEach(() => {
+    writePrepare("ready")
+    run(["init", prepPath])
+    touchArtifacts("b-inspect")
+  })
+
+  test("rejects readying a pending phase that was never started", () => {
+    const before = readFileSync(statusPath, "utf8")
+    expect(run(["ready", statusPath, "b-inspect"]).code).not.toBe(0)
+    expect(readFileSync(statusPath, "utf8")).toBe(before)
+  })
+
+  test("rejects blocking a pending phase that was never started", () => {
+    const before = readFileSync(statusPath, "utf8")
+    expect(run(["block", statusPath, "b-inspect", "tool missing", "install it"]).code).not.toBe(0)
+    expect(readFileSync(statusPath, "utf8")).toBe(before)
+  })
+})
+
 describe("corruption safety", () => {
   test("an invalid run-status.json is left unchanged on a failed transition", () => {
     writeFileSync(statusPath, "{ not valid json ")

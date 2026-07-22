@@ -204,7 +204,8 @@ function ready(statusPath: string, phaseId: string, artifactArgs: string[]): voi
   const path = resolve(statusPath)
   const status = loadStatus(path)
   const phase = phaseAtNext(status, phaseId)
-  if (phase.status === "ready") fail(`Phase ${phaseId} is already ready`)
+  if (phase.status !== "running")
+    fail(`Cannot ready phase ${phaseId} from status "${phase.status}"; call start first`)
 
   const auditRoot = dirname(path)
   const expected = expectedArtifacts(phaseId as PhaseId, auditRoot)
@@ -232,7 +233,8 @@ function block(statusPath: string, phaseId: string, message: string, resumeActio
   const path = resolve(statusPath)
   const status = loadStatus(path)
   const phase = phaseAtNext(status, phaseId)
-  if (phase.status === "ready") fail(`Cannot block already-ready phase ${phaseId}`)
+  if (phase.status !== "running")
+    fail(`Cannot block phase ${phaseId} from status "${phase.status}"; call start first`)
 
   const blocker = { message, resumeAction }
   phase.status = "blocked"
