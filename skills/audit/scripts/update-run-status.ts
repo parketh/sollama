@@ -132,6 +132,8 @@ function init(prepareOutputPath: string): void {
 
   const auditRoot = dirname(abs)
   const statusPath = join(auditRoot, "run-status.json")
+  if (existsSync(statusPath))
+    fail(`run-status.json already exists at ${statusPath}; resume instead of re-running init`)
   const ts = now()
   const isReady = prep.status === "ready"
   const blockers = isReady ? [] : prepareBlockers(prep.summary)

@@ -85,6 +85,15 @@ describe("init", () => {
     expect(s.phases[0]?.status).toBe("blocked")
     expect(s.blockers.length).toBeGreaterThan(0)
   })
+
+  test("refuses to overwrite an existing run-status.json", () => {
+    writePrepare("ready")
+    run(["init", prepPath])
+    run(["start", statusPath, "b-inspect"])
+    const before = readFileSync(statusPath, "utf8")
+    expect(run(["init", prepPath]).code).not.toBe(0)
+    expect(readFileSync(statusPath, "utf8")).toBe(before)
+  })
 })
 
 describe("start", () => {
