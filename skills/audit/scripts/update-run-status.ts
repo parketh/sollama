@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, renameSync, writeFileSync } from "node:fs"
 import { dirname, isAbsolute, join, resolve, sep } from "node:path"
+import { PrepareOutput } from "../../../scripts/shared/prepare-output-schema.ts"
 import {
   expectedArtifacts,
   PHASE_IDS,
@@ -90,16 +91,8 @@ function phaseAtNext(status: RunStatusType, phaseId: string) {
   return phase
 }
 
-function prepareBlockers(summary: unknown): { message: string; resumeAction: string }[] {
-  const raw =
-    summary &&
-    typeof summary === "object" &&
-    Array.isArray((summary as { blockers?: unknown }).blockers)
-      ? ((summary as { blockers: unknown[] }).blockers.filter(
-          (b): b is string => typeof b === "string" && b.length > 0,
-        ) as string[])
-      : []
-  const messages = raw.length > 0 ? raw : ["a-prepare reported blocked status"]
+function prepareBlockers(blockers: string[]): { message: string; resumeAction: string }[] {
+  const messages = blockers.length > 0 ? blockers : ["a-prepare reported blocked status"]
   return messages.map((message) => ({
     message,
     resumeAction:
@@ -111,24 +104,19 @@ function prepareBlockers(summary: unknown): { message: string; resumeAction: str
 // generation; init only reads it back and never derives a new one.
 function init(prepareOutputPath: string): void {
   const abs = resolve(prepareOutputPath)
-  let prep: {
-    status?: unknown
-    inputs?: { auditId?: unknown; repoPath?: unknown; commitHash?: unknown }
-    summary?: unknown
-  }
+  let raw: unknown
   try {
-    prep = JSON.parse(readFileSync(abs, "utf8"))
+    raw = JSON.parse(readFileSync(abs, "utf8"))
   } catch (error) {
     fail(`Failed to read prepare output ${abs}: ${error instanceof Error ? error.message : error}`)
   }
-
-  const auditId = prep.inputs?.auditId
-  const repoPath = prep.inputs?.repoPath
-  const commitHash = prep.inputs?.commitHash
-  if (typeof auditId !== "string" || typeof repoPath !== "string" || typeof commitHash !== "string")
-    fail("prepare-output.json is missing inputs.auditId, inputs.repoPath, or inputs.commitHash")
-  if (prep.status !== "ready" && prep.status !== "blocked")
-    fail(`prepare-output.json has an unexpected status: ${String(prep.status)}`)
+  const parsed = PrepareOutput.safeParse(raw)
+  if (!parsed.success)
+    fail(
+      `Invalid prepare-output.json at ${abs}:\n${JSON.stringify(parsed.error.format(), null, 2)}`,
+    )
+  const prep = parsed.data
+  const { auditId, repoPath, commitHash } = prep.inputs
 
   const auditRoot = dirname(abs)
   const statusPath = join(auditRoot, "run-status.json")
@@ -136,7 +124,7 @@ function init(prepareOutputPath: string): void {
     fail(`run-status.json already exists at ${statusPath}; resume instead of re-running init`)
   const ts = now()
   const isReady = prep.status === "ready"
-  const blockers = isReady ? [] : prepareBlockers(prep.summary)
+  const blockers = isReady ? [] : prepareBlockers(prep.summary.blockers)
 
   const prepPhase = isReady
     ? {

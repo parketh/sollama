@@ -34,7 +34,22 @@ function writePrepare(status: "ready" | "blocked") {
       auditScope: "",
       auditFocus: "",
     },
+    detected: {
+      isSolana: true,
+      languages: ["rust"],
+      frameworks: ["anchor"],
+      packageManagers: ["cargo"],
+      env: { required: [], missing: [] },
+    },
+    commands: {
+      install: [],
+      build: { cwd: join(tmp, "repo"), command: "cargo build-sbf", status: "passed" },
+      tests: [],
+    },
     summary: {
+      isSupported: status === "ready",
+      buildPassed: status === "ready",
+      testsPassed: status === "ready" ? true : null,
       blockers: status === "blocked" ? ["worktree is dirty at pinned commit"] : [],
       warnings: [],
     },
