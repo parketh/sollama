@@ -27,7 +27,22 @@ codex plugin add sollama@sollama
 
 ## Usage
 
-An audit runs as seven sequential steps, each as an independently invokable skill. Ask Claude or Codex to run them in order.
+Run a full audit with `/sollama:audit`. It coordinates all seven phases end to end, each in a fresh worker, and records resumable progress in `run-status.json`. The run stops on blockers with an exact resume action from the last successful phase.
+
+```bash
+# New run (pass target repo path + commit)
+/sollama:audit <path/to/target-repo> at commit <pinned-commit>
+
+# Resume run (pass path to run-status.json or audit id)
+/sollama:audit resume <target-repo>/.sollama/audits/<audit-id>/run-status.json
+/sollama:audit resume <target-repo> <audit-id>
+```
+
+Artifacts are written to the target repo at `<target-repo>/.sollama/audits/<audit-id>/`.
+
+### Running phases independently
+
+Each phase is also an independently invokable skill, useful for debugging or re-running a single step. Ask Claude or Codex to run them in order:
 
 | Step | Skill | Output |
 |------|-------|--------|
@@ -39,11 +54,7 @@ An audit runs as seven sequential steps, each as an independently invokable skil
 | 6. Verify | `/sollama:f-verify` | `verification.json` + PoCs |
 | 7. Report | `/sollama:g-report` | `report/report.md` |
 
-Each step consumes the target repo and prior artifacts, and blocks with a clear resume action if a required input, tool, or build is missing. Artifacts are written into the **target repo**, not this one:
-
-```
-<target-repo>/.sollama/audits/<audit-id>/
-```
+Each step consumes the target repo and prior artifacts, and blocks with a clear resume action if a required input, tool, or build is missing.
 
 Step 4 is the key step that generates candidate findings. It fans out 18 specialist agents in parallel, each applying a distinct lens (invariants, access control, economic security, etc.).
 

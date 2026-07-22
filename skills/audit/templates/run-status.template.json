@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "1.0",
+  "auditId": "example-a1b2c3d-20260720-120000",
+  "repoPath": "/absolute/path/to/example",
+  "commitHash": "a1b2c3d4e5f6",
+  "status": "running",
+  "createdAt": "2026-07-20T12:00:00.000Z",
+  "updatedAt": "2026-07-20T12:10:00.000Z",
+  "nextPhase": "b-inspect",
+  "phases": [
+    {
+      "id": "a-prepare",
+      "status": "ready",
+      "attempts": 1,
+      "artifactPaths": [
+        "/absolute/path/to/example/.sollama/audits/example-a1b2c3d-20260720-120000/prepare-output.json"
+      ],
+      "blockers": [],
+      "startedAt": "2026-07-20T12:00:00.000Z",
+      "completedAt": "2026-07-20T12:10:00.000Z"
+    },
+    {
+      "id": "b-inspect",
+      "status": "pending",
+      "attempts": 0,
+      "artifactPaths": [],
+      "blockers": []
+    },
+    {
+      "id": "c-static-analysis",
+      "status": "pending",
+      "attempts": 0,
+      "artifactPaths": [],
+      "blockers": []
+    },
+    {
+      "id": "d-agent-fanout",
+      "status": "pending",
+      "attempts": 0,
+      "artifactPaths": [],
+      "blockers": []
+    },
+    {
+      "id": "e-organize",
+      "status": "pending",
+      "attempts": 0,
+      "artifactPaths": [],
+      "blockers": []
+    },
+    {
+      "id": "f-verify",
+      "status": "pending",
+      "attempts": 0,
+      "artifactPaths": [],
+      "blockers": []
+    },
+    {
+      "id": "g-report",
+      "status": "pending",
+      "attempts": 0,
+      "artifactPaths": [],
+      "blockers": []
+    }
+  ],
+  "blockers": []
+}
