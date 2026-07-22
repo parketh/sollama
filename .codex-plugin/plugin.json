@@ -1,7 +1,7 @@
 {
   "name": "sollama",
   "version": "0.1.0",
-  "description": "Agentic smart contract auditor for Solana programs.",
+  "description": "Agentic smart contract auditor for Solana programs. Run the full audit end to end with /sollama:audit.",
   "author": {
     "name": "Sollama"
   },
@@ -13,14 +13,14 @@
   "interface": {
     "displayName": "Sollama",
     "shortDescription": "Agentic smart contract auditor for Solana",
-    "longDescription": "Sollama runs a skill-based audit workflow for Solana programs: prepare, inspect, analyze, organize, verify, and report.",
+    "longDescription": "Sollama runs a skill-based audit workflow for Solana programs: prepare, inspect, analyze, organize, verify, and report. Run the whole workflow end to end with /sollama:audit, or invoke any phase on its own.",
     "developerName": "Sollama",
     "category": "Engineering",
     "capabilities": ["Interactive", "Read", "Write"],
     "defaultPrompt": [
-      "Audit this Solana program",
-      "Prepare this repo for an audit",
-      "Run agent fanout on this audit"
+      "Run a full audit on this Solana program with /sollama:audit",
+      "Resume my Sollama audit run",
+      "Prepare this repo for an audit"
     ],
     "brandColor": "#111827",
     "screenshots": []

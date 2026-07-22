@@ -1,7 +1,7 @@
 {
   "name": "sollama",
   "version": "0.1.0",
-  "description": "Agentic smart contract auditor for Solana programs.",
+  "description": "Agentic smart contract auditor for Solana programs. Run the full audit end to end with /sollama:audit.",
   "author": {
     "name": "Sollama"
   }
