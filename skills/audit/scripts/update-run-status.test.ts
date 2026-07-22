@@ -154,6 +154,15 @@ describe("ready", () => {
     expect(s.phases[1]?.artifactPaths).toEqual(expectedArtifacts("b-inspect" as never, auditRoot))
   })
 
+  test("rejects an extra artifact outside the audit root", () => {
+    touchArtifacts("b-inspect")
+    const outside = join(tmp, "outside.txt")
+    writeFileSync(outside, "x")
+    const before = readFileSync(statusPath, "utf8")
+    expect(run(["ready", statusPath, "b-inspect", outside]).code).not.toBe(0)
+    expect(readFileSync(statusPath, "utf8")).toBe(before)
+  })
+
   test("rejects re-readying a completed phase", () => {
     touchArtifacts("b-inspect")
     run(["ready", statusPath, "b-inspect"])

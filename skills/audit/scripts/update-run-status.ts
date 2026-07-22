@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, renameSync, writeFileSync } from "node:fs"
-import { dirname, isAbsolute, join, resolve } from "node:path"
+import { dirname, isAbsolute, join, resolve, sep } from "node:path"
 import {
   expectedArtifacts,
   PHASE_IDS,
@@ -215,8 +215,11 @@ function ready(statusPath: string, phaseId: string, artifactArgs: string[]): voi
   const recorded = [...expected]
   for (const arg of artifactArgs) {
     if (!isAbsolute(arg)) fail(`Artifact path must be absolute: ${arg}`)
-    if (!existsSync(arg)) fail(`Artifact does not exist: ${arg}`)
-    if (!recorded.includes(arg)) recorded.push(arg)
+    const resolved = resolve(arg)
+    if (resolved !== auditRoot && !resolved.startsWith(auditRoot + sep))
+      fail(`Artifact must be under the audit root ${auditRoot}: ${arg}`)
+    if (!existsSync(resolved)) fail(`Artifact does not exist: ${arg}`)
+    if (!recorded.includes(resolved)) recorded.push(resolved)
   }
 
   phase.status = "ready"
